@@ -1,172 +1,250 @@
 rm(list = ls())
 
-wd <- "/Users/rmarinao/Library/CloudStorage/Dropbox/RM_fdcyt_cag"
-setwd(wd)
-
 library(terra)
-library(hydroTSM)
 
-markham_index_zoo <- function(z) {
-  if (!zoo::is.zoo(z)) stop("'z' debe ser 'zoo'")
-  S <- numeric(ncol(z)); names(S) <- colnames(z)
-  months <- as.integer(format(index(z), "%m"))
-  for (j in seq_len(ncol(z))) {
-    x <- coredata(z[, j])
-    mclim <- tapply(x, months, mean, na.rm = TRUE)
-    full  <- rep(NA_real_, 12); names(full) <- 1:12
-    full[names(mclim)] <- mclim; mclim <- full
-    mu <- mean(mclim, na.rm = TRUE)
-    S[j] <- 0.5 * sum(abs(mclim - mu), na.rm = TRUE) /
-      sum(mclim, na.rm = TRUE)
+tag <- "cr2sub"
+version <- "v1"
+
+# -----------------------------------------------------------------------------
+# archivos de entrada
+# -----------------------------------------------------------------------------
+metadata_file <- "cr2sub/cr2sub_v1_metadata.csv"
+well_ts_file <- "cr2sub/cr2sub_v1_mon_clean.csv"
+
+dem_file <- "input/other_data/dem_masl_fabdemv1.2_2015_300m_epsg4326.tif"
+slope_file <- "input/other_data/slope_deg_fabdemv1.2_2015_300m_epsg4326.tif"
+
+pcp_file <- "inpit/other_data/pr_mm_cr2metv2.5_ann_1960_2024_0.05deg_epsg4326.nc"
+
+# -----------------------------------------------------------------------------
+# utilidades
+# -----------------------------------------------------------------------------
+safe_cv <- function(mean_val, sd_val) {
+  if (!is.finite(mean_val) || abs(mean_val) < .Machine$double.eps) {
+    return(NA_real_)
   }
-  return(S)
+  sd_val / mean_val
 }
 
-
-# -----------------------------------------------------------
-# decadal_slope_zoo_simple
-# Pendiente lineal por década para cada columna de un zoo mensual
-#   z      : zoo mensual (índice Date)
-#   start  : (opcional) "YYYY-MM-DD" o Date; inicio de la ventana
-#   end    : (opcional) idem; fin de la ventana
-#   dpy    : días por año (default 365.25)
-# -----------------------------------------------------------
-decadal_slope_zoo <- function(z, start = NULL, end = NULL, dpy = 365.25) {
-  if (!requireNamespace("zoo", quietly = TRUE) || !zoo::is.zoo(z))
-    stop("'z' debe ser un objeto 'zoo' con fechas.")
-  
-  if (!is.null(start) || !is.null(end))
-    z <- window(z, start = start, end = end)
-  
-  if (nrow(z) < 2)
-    stop("Menos de dos observaciones tras aplicar la ventana.")
-  
-  t_days <- as.numeric(index(z))        # días desde 1970-01-01
-  factor  <- dpy * 10                   # días por década
-  
-  n_col  <- ncol(z)
-  slope  <- numeric(n_col)
-  names(slope) <- colnames(z)
-  
-  for (j in seq_len(n_col)) {
-    y  <- coredata(z[, j])
-    ok <- !is.na(y)
-    if (sum(ok) < 2) { slope[j] <- NA_real_; next }
-    
-    slope[j] <- coef(lm(y[ok] ~ t_days[ok]))[2] * factor
+clean_stats <- function(x) {
+  x <- x[is.finite(x)]
+  if (!length(x)) {
+    return(list(
+      mean = NA_real_, sd = NA_real_, cv = NA_real_,
+      clean_mean = NA_real_, clean_sd = NA_real_, clean_cv = NA_real_
+    ))
   }
-  return(slope)
+  mean_val <- mean(x)
+  sd_val <- sd(x)
+  cv_val <- safe_cv(mean_val, sd_val)
+
+  if (!is.finite(sd_val) || sd_val == 0) {
+    clean <- x
+  } else {
+    clean <- x[abs(x - mean_val) <= (2 * sd_val)]
+    if (!length(clean)) clean <- x
+  }
+
+  clean_mean <- mean(clean)
+  clean_sd <- sd(clean)
+  clean_cv <- safe_cv(clean_mean, clean_sd)
+
+  list(
+    mean = mean_val, sd = sd_val, cv = cv_val,
+    clean_mean = clean_mean, clean_sd = clean_sd, clean_cv = clean_cv
+  )
 }
 
+compute_gwl_stats <- function(ts_wide, metadata_ref) {
+  well_ids <- intersect(metadata_ref$well_id, names(ts_wide))
+  stats_list <- lapply(well_ids, function(wid) {
+    clean_stats(ts_wide[[wid]])
+  })
+  stats_df <- data.frame(
+    well_id = well_ids,
+    cr2sub_mean_gwl = vapply(stats_list, function(x) x$mean, numeric(1)),
+    cr2sub_sd_gwl = vapply(stats_list, function(x) x$sd, numeric(1)),
+    cr2sub_cv_gwl = vapply(stats_list, function(x) x$cv, numeric(1)),
+    cr2sub_clean_mean_gwl = vapply(stats_list, function(x) x$clean_mean, numeric(1)),
+    cr2sub_clean_sd_gwl = vapply(stats_list, function(x) x$clean_sd, numeric(1)),
+    cr2sub_clean_cv_gwl = vapply(stats_list, function(x) x$clean_cv, numeric(1)),
+    stringsAsFactors = FALSE
+  )
+  merge(metadata_ref[c("cr2sub_id", "well_id")], stats_df, by = "well_id", all.x = TRUE)
+}
 
+safe_raster <- function(path) {
+  tryCatch(
+    terra::rast(path),
+    error = function(e) {
+      warning("No se pudo leer el ráster ", path, ": ", conditionMessage(e))
+      NULL
+    }
+  )
+}
 
-subdir <- "OUT/attribute_data_frames/gwl" 
-source("scripts/fun/fun_build_attribute_data_frames.R") # some functions
+extract_or_na <- function(raster_obj, vect_obj) {
+  if (is.null(raster_obj)) {
+    return(rep(NA_real_, length(vect_obj)))
+  }
+  vals <- terra::extract(raster_obj, vect_obj)[, 2]
+  vals
+}
 
+# -----------------------------------------------------------------------------
+# lectura de metadatos y series
+# -----------------------------------------------------------------------------
+metadata_raw <- read.csv(metadata_file, stringsAsFactors = FALSE)
 
-gwl <- vect("IN/gwl/gwl_m_dga_mon_info_1957_2024_epsg4326.gpkg")
+metadata_df <- data.frame(
+  well_id = metadata_raw$well_id,
+  dga_well_code = metadata_raw$dga_code,
+  dga_well_name = metadata_raw$well_name,
+  dga_well_basin = metadata_raw$well_basin,
+  dga_well_subbasin = metadata_raw$well_subbasin,
+  dga_well_lat = as.numeric(metadata_raw$well_lat),
+  dga_well_lon = as.numeric(metadata_raw$well_lon),
+  dga_well_utm_north = as.numeric(metadata_raw$well_north),
+  dga_well_utm_east = as.numeric(metadata_raw$well_east),
+  dga_well_elev = as.numeric(metadata_raw$well_elev),
+  well_id = metadata_raw$well_id,
+  stringsAsFactors = FALSE
+)
 
+well_ts <- read.csv(well_ts_file, stringsAsFactors = FALSE)
+if (!"date" %in% names(well_ts)) stop("La columna 'date' es requerida en ", well_ts_file)
+well_ts$date <- as.Date(well_ts$date)
 
-gwl_ts0  <- read.csv.zoo("IN/gwl/gwl_m_dga_mon_ts_1957_2024.csv",
-                       format = "%Y-%m-%d", check.names = FALSE)
+# -----------------------------------------------------------------------------
+# atributos derivados
+# -----------------------------------------------------------------------------
+coordinates_df <- data.frame(
+  cr2sub_id = metadata_df$cr2sub_id,
+  cr2sub_lat = metadata_df$dga_well_lat,
+  cr2sub_lon = metadata_df$dga_well_lon,
+  cr2sub_utm_north_h19 = metadata_df$dga_well_utm_north,
+  cr2sub_utm_south_h19 = metadata_df$dga_well_utm_east,
+  stringsAsFactors = FALSE
+)
 
+gwl_stats_df <- compute_gwl_stats(well_ts, metadata_df)
 
-gwl_ts <- gwl_ts0[,as.character(gwl$well_id)]
+# --- topografía real --------------------------------------------------------
+well_vect <- terra::vect(metadata_df,
+  geom = c("dga_well_lon", "dga_well_lat"),
+  crs = "EPSG:4326", keepgeom = TRUE
+)
 
-gwl_avg <- apply(coredata(gwl_ts), 2, mean, na.rm = TRUE)
-gwl_sd <- apply(coredata(gwl_ts), 2, sd, na.rm = TRUE)
-gwl_p10 <- apply(coredata(gwl_ts), 2, quantile, probs = 0.1, na.rm = TRUE)
-gwl_p25 <- apply(coredata(gwl_ts), 2, quantile, probs = 0.25, na.rm = TRUE)
-gwl_p50 <- apply(coredata(gwl_ts), 2, quantile, probs = 0.5, na.rm = TRUE)
-gwl_p75 <- apply(coredata(gwl_ts), 2, quantile, probs = 0.75, na.rm = TRUE)
-gwl_p90 <- apply(coredata(gwl_ts), 2, quantile, probs = 0.9, na.rm = TRUE)
+dem_raster <- safe_raster(dem_file)
+slope_raster <- safe_raster(slope_file)
 
-# gwl_Sea <- markham_index_zoo(gwl_ts)
-gwl_trend <- decadal_slope_zoo(gwl_ts, start = "1980-01-01")
+dem_vals <- extract_or_na(dem_raster, well_vect)
+slope_vals <- extract_or_na(slope_raster, well_vect)
 
+topography_df <- data.frame(
+  cr2sub_id = metadata_df$cr2sub_id,
+  cr2sub_elev = ifelse(is.na(dem_vals), metadata_df$dga_well_elev, dem_vals),
+  cr2sub_slp = slope_vals,
+  stringsAsFactors = FALSE
+)
 
-any(names(gwl_p90) != names(gwl_trend))
+# --- placeholders para datos pendientes ------------------------------------
+camels_df <- data.frame(
+  cr2sub_id = metadata_df$cr2sub_id,
+  cr2sub_in_basin_camels = NA_character_,
+  cr2sub_camels_pr_yr = NA_real_,
+  cr2sub_camels_aridity = NA_real_,
+  cr2sub_camels_snowf = NA_real_,
+  cr2sub_camels_elev = NA_real_,
+  cr2sub_camels_slp = NA_real_,
+  stringsAsFactors = FALSE
+)
 
-gwl$gwl_avg <- round(gwl_avg,5)
-gwl$gwl_sd  <- round(gwl_sd ,5)
-gwl$gwl_cv  <- gwl$gwl_sd/gwl$gwl_avg
-gwl$gwl_p10 <- round(gwl_p10,5)
-gwl$gwl_p25 <- round(gwl_p25,5)
-gwl$gwl_p50 <- round(gwl_p50,5)
-gwl$gwl_p75 <- round(gwl_p75,5)
-gwl$gwl_p90 <- round(gwl_p90,5)
-# gwl$gwl_Sea <- gwl_Sea
-gwl$gwl_trend <- gwl_trend
+bna_df <- data.frame(
+  cr2sub_id = metadata_df$cr2sub_id,
+  cr2sub_in_basin_bna = NA_character_,
+  cr2sub_bna_pr_yr = NA_real_,
+  cr2sub_bna_aridity = NA_real_,
+  cr2sub_bna_snowf = NA_real_,
+  cr2sub_bna_elev = NA_real_,
+  cr2sub_bna_slp = NA_real_,
+  stringsAsFactors = FALSE
+)
 
-### topo
+soil_df <- data.frame(
+  cr2sub_id = metadata_df$cr2sub_id,
+  cr2sub_clsoilmap_awc_0_100cm = NA_real_,
+  cr2sub_clsoilmap_awc_100_200cm = NA_real_,
+  cr2sub_clsoilmap_bulkd_0_100cm = NA_real_,
+  cr2sub_clsoilmap_bulkd_100_200cm = NA_real_,
+  cr2sub_clsoilmap_clay_0_100cm = NA_real_,
+  cr2sub_clsoilmap_clay_100_200cm = NA_real_,
+  cr2sub_clsoilmap_ksat_0_100cm = NA_real_,
+  cr2sub_clsoilmap_ksat_100_200cm = NA_real_,
+  cr2sub_clsoilmap_sand_0_100cm = NA_real_,
+  cr2sub_clsoilmap_sand_100_200cm = NA_real_,
+  stringsAsFactors = FALSE
+)
 
-elev_raster <- rast("IN/topo/elevation_srtm_v4.1_Chile_2000_1200m_epsg4326.nc")
-slp_raster <- rast("IN/topo/slope_srtm_v4.1_Chile_2000_1200m_epsg4326.nc")
+# -----------------------------------------------------------------------------
+# consolidación
+# -----------------------------------------------------------------------------
+merge_list <- list(
+  metadata_df[, c(
+    "cr2sub_id", "dga_well_code", "dga_well_name", "dga_well_basin",
+    "dga_well_subbasin", "dga_well_lat", "dga_well_lon",
+    "dga_well_utm_north", "dga_well_utm_east", "dga_well_elev"
+  )],
+  coordinates_df,
+  topography_df,
+  gwl_stats_df[, !(names(gwl_stats_df) %in% c("well_id"))],
+  camels_df,
+  bna_df,
+  soil_df
+)
 
+cr2sub_attributes_df <- Reduce(
+  function(x, y) merge(x, y, by = "cr2sub_id", all.x = TRUE),
+  merge_list
+)
 
+required_order <- c(
+  "cr2sub_id",
+  "dga_well_code", "dga_well_name", "dga_well_basin", "dga_well_subbasin",
+  "dga_well_lat", "dga_well_lon", "dga_well_utm_north", "dga_well_utm_east",
+  "dga_well_elev",
+  "cr2sub_lat", "cr2sub_lon", "cr2sub_utm_north_h19", "cr2sub_utm_south_h19",
+  "cr2sub_elev", "cr2sub_slp",
+  "cr2sub_mean_gwl", "cr2sub_sd_gwl", "cr2sub_cv_gwl",
+  "cr2sub_clean_mean_gwl", "cr2sub_clean_sd_gwl", "cr2sub_clean_cv_gwl",
+  "cr2sub_in_basin_camels", "cr2sub_camels_pr_yr", "cr2sub_camels_aridity",
+  "cr2sub_camels_snowf", "cr2sub_camels_elev", "cr2sub_camels_slp",
+  "cr2sub_in_basin_bna", "cr2sub_bna_pr_yr", "cr2sub_bna_aridity",
+  "cr2sub_bna_snowf", "cr2sub_bna_elev", "cr2sub_bna_slp",
+  "cr2sub_clsoilmap_awc_0_100cm", "cr2sub_clsoilmap_awc_100_200cm",
+  "cr2sub_clsoilmap_bulkd_0_100cm", "cr2sub_clsoilmap_bulkd_100_200cm",
+  "cr2sub_clsoilmap_clay_0_100cm", "cr2sub_clsoilmap_clay_100_200cm",
+  "cr2sub_clsoilmap_ksat_0_100cm", "cr2sub_clsoilmap_ksat_100_200cm",
+  "cr2sub_clsoilmap_sand_0_100cm", "cr2sub_clsoilmap_sand_100_200cm"
+)
 
-elev <- terra::extract(elev_raster, y = gwl)[,2]
+missing_cols <- setdiff(required_order, names(cr2sub_attributes_df))
+if (length(missing_cols)) {
+  stop("Columnas faltantes en la tabla final: ", paste(missing_cols, collapse = ", "))
+}
 
-slp <- terra::extract(slp_raster, y = gwl)[,2]
+cr2sub_attributes_df <- cr2sub_attributes_df[, required_order]
 
-gwl$gauge_elev <- round(elev,5)
-gwl$gauge_slp <- round(slp,5)
+output_dir <- "cr2sub"
+if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
 
-## meteo
+output_file <- file.path(output_dir, "cr2sub_v1_attributes.csv")
+write.csv(cr2sub_attributes_df, output_file, row.names = FALSE)
 
-pr <- rast("IN/meteo/cr2met_v2p5/ann/pr_mm_cr2met_2p5best_ann_1960_2024_0p05deg_epsg4326.nc") |>
-        app(fun = mean, na.rm = TRUE)
-et0 <- rast("IN/meteo/cr2met_v2p5/ann/et0_mm_cr2met_2p5best_ann_1960_2024_0p05deg_epsg4326.nc") |>
-        app(fun = mean, na.rm = TRUE)
-snow <- rast("IN/meteo/cr2met_v2p5/ann/snow_mm_cr2met_2p5best_ann_1960_2024_0p05deg_epsg4326.nc") |>
-           app(fun = mean, na.rm = TRUE)
+message("Atributos exportados en ", output_file)
+message(
+  "Dimensiones finales: ", nrow(cr2sub_attributes_df), " pozos x ",
+  ncol(cr2sub_attributes_df), " atributos"
+)
 
-
-snowf_rast <- snow/pr
-aridity_rast <- et0/pr
-
-terra::plot(snowf_rast)
-terra::plot(aridity_rast)
-
-pr_spring <- rast("IN/meteo/cr2met_v2p5/season/pr_mm_cr2met_2p5best_south_spring_1960_2024_0p05deg_epsg4326.nc") |>
-  app(fun = mean, na.rm = TRUE)
-
-pr_summer <- rast("IN/meteo/cr2met_v2p5/season/pr_mm_cr2met_2p5best_south_summer_1960_2025_0p05deg_epsg4326.nc") |>
-  app(fun = mean, na.rm = TRUE)
-
-pr_autumn <- rast("IN/meteo/cr2met_v2p5/season/pr_mm_cr2met_2p5best_south_autumn_1960_2024_0p05deg_epsg4326.nc") |>
-  app(fun = mean, na.rm = TRUE)
-
-pr_winter <- rast("IN/meteo/cr2met_v2p5/season/pr_mm_cr2met_2p5best_south_winter_1960_2024_0p05deg_epsg4326.nc") |>
-  app(fun = mean, na.rm = TRUE)
-
-pr_yr_rast <- pr
-pr_om_rast <- pr_spring + pr_summer
-pr_as_rast <- pr_autumn + pr_winter
-
-
-
-
-
-gwl_pr_yr <- terra::extract(pr_yr_rast, y = gwl)[,2]
-gwl_pr_om <- terra::extract(pr_om_rast, y = gwl)[,2]
-gwl_pr_as <- terra::extract(pr_as_rast, y = gwl)[,2]
-
-gwl_aridity <- terra::extract(aridity_rast, y = gwl)[,2]
-gwl_snowf   <- terra::extract(snowf_rast, y = gwl)[,2]
-
-
-gwl$gauge_pr_yr <- round(gwl_pr_yr,5)
-gwl$gauge_pr_om <- round(gwl_pr_om,5)
-gwl$gauge_pr_as <- round(gwl_pr_as,5)
-
-gwl$gauge_aridity <- round(gwl_aridity,5)
-gwl$gauge_snowf   <- round(gwl_snowf,5)
-
-gwl_df <- as.data.frame(gwl)
-
-if(!dir.exists(subdir)) dir.create(subdir)
-
-writeVector(gwl,  paste0(subdir, "/gwl_dga_attributes_epsg4326.gpkg"), overwrite = TRUE)
-write.csv(gwl_df, paste0(subdir, "/gwl_dga_attributes.csv"), row.names = FALSE)
-
+str(cr2sub_attributes_df)
