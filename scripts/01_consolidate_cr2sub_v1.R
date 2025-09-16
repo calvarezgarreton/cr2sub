@@ -1,9 +1,11 @@
 # -----------------------------------------------------------------------------
-# Script: 01_read_xls.R
-# Purpose: Read groundwater level XLS files from DGA, extract metadata and time
-#   series, aggregate monthly values, fill missing months, and export outputs.
+# Script: 01_consolidate_cr2sub_v1.R
+# Purpose: Consolidate groundwater level XLS files from DGA, extracting metadata
+#   and time series to build monthly aggregates, backfill missing months, and
+#   export curated outputs for CR2SUB.
 # Author: Rodrigo Marinao Rivas, Camila Alvarez Garretón
 # Date: [2025-07-08]
+# Updated : [2025-09-16]
 # -----------------------------------------------------------------------------
 
 library(readxl)
@@ -71,15 +73,15 @@ for (file_idx in seq_along(files)) {
         # Guardar metadatos
         sheets_details[[sheet_idx]] <- processed_data$metadata
         # Create output data.frame with dates and water level values
-        dga_code <- substr(xls[6, 3], 1, 10)
+        dga_well_code <- substr(xls[6, 3], 1, 10)
 
         df_out <- data.frame(
           fecha = processed_data$dates,
           nivel = processed_data$data
         )
-        colnames(df_out)[2] <- dga_code
+        colnames(df_out)[2] <- dga_well_code
         # Define directory for this well code under temporary folder
-        pozo_dir <- file.path(tmp_folder, dga_code)
+        pozo_dir <- file.path(tmp_folder, dga_well_code)
         # Ensure output directory exists
         create_dir_if_not_exists(pozo_dir)
         # Write CSV for this well, named by code and date range
@@ -87,7 +89,7 @@ for (file_idx in seq_along(files)) {
           pozo_dir,
           sprintf(
             "Nivel_%s_%s_%s.csv",
-            dga_code,
+            dga_well_code,
             min(processed_data$dates),
             max(processed_data$dates)
           )
@@ -121,15 +123,15 @@ for (file_idx in seq_along(files)) {
 
 # Define columns to extract for station metadata
 metadata_columns <- c(
-  "dga_code",
-  "well_name",
-  "well_basin",
-  "well_subbasin",
-  "well_elev",
-  "well_lat",
-  "well_lon",
-  "well_north",
-  "well_east"
+  "dga_well_code",
+  "dga_well_name",
+  "dga_well_basin",
+  "dga_well_subbasin",
+  "dga_well_elev",
+  "dga_well_lat",
+  "dga_well_lon",
+  "dga_well_north",
+  "dga_well_east"
 )
 
 # Combine metadata from all files and sheets into one data.frame
@@ -154,24 +156,24 @@ df_details_prov <- df_details_raw[!is.na(df_details_raw[, 1]), ]
 # Remove duplicate station entries based on key metadata fields
 index_keep <- !duplicated(apply(
   df_details_prov[, c(
-    "dga_code",
-    "well_name"
+    "dga_well_code",
+    "dga_well_name"
   )],
   FUN = paste, MARGIN = 1, collapse = ""
 ))
 full_details <- df_details_prov[index_keep, ]
 
-rownames(full_details) <- full_details[, "dga_code"]
+rownames(full_details) <- full_details[, "dga_well_code"]
 
 details <- full_details
 
 # Convert altitude to numeric and latitude/longitude to decimal degrees
-details$well_id <- as.numeric(sub("-[0-9Kk]$", "", details$dga_code))
-details$well_elev <- as.numeric(full_details$well_elev)
-details$well_lat <- unname(sapply(full_details$well_lat, deg2dec))
-details$well_lon <- unname(sapply(full_details$well_lon, deg2dec))
-details$well_north <- as.numeric(full_details$well_north)
-details$well_east <- as.numeric(full_details$well_east)
+details$cr2sub_id <- as.numeric(sub("-[0-9Kk]$", "", details$dga_well_code))
+details$dga_well_elev <- as.numeric(full_details$dga_well_elev)
+details$dga_well_lat <- unname(sapply(full_details$dga_well_lat, deg2dec))
+details$dga_well_lon <- unname(sapply(full_details$dga_well_lon, deg2dec))
+details$dga_well_north <- as.numeric(full_details$dga_well_north)
+details$dga_well_east <- as.numeric(full_details$dga_well_east)
 
 # -----------------------------------------------------------------------------
 # Section: Spatial validation – keep only stations within Chilean boundaries
@@ -180,7 +182,7 @@ details$well_east <- as.numeric(full_details$well_east)
 # Convert metadata table to spatial vector using longitude and latitude columns
 # CRS is WGS84 (EPSG:4326), suitable for global geographic coordinates
 details_vect <- vect(details,
-  geom = c("well_lon", "well_lat"),
+  geom = c("dga_well_lon", "dga_well_lat"),
   crs = "epsg:4326"
 )
 
@@ -192,7 +194,7 @@ chile_boundaries <- vect("input/other_data/Chile_boundaries_simplified_from_SIIT
 points_in_chile <- mask(details_vect, chile_boundaries)
 
 # Create a logical flag to identify valid stations inside Chile
-flag_details <- details$well_id %in% points_in_chile$well_id
+flag_details <- details$cr2sub_id %in% points_in_chile$cr2sub_id
 
 # Filter original metadata to keep only valid Chilean stations
 details_filtered <- details[flag_details, ]
@@ -252,7 +254,7 @@ codigos_pozos <- as.numeric(sub("-[0-9Kk]$", "", codigos_pozos))
 colnames(ts_all) <- codigos_pozos
 coredata(ts_all)[ts_all <= 0] <- NA
 
-full_series <- -ts_all[, as.character(details_filtered$well_id)]
+full_series <- -ts_all[, as.character(details_filtered$cr2sub_id)]
 
 # Save raw combined time series to CSV
 # df <- data.frame(date = time(full_series), coredata(full_series), check.names = FALSE)
