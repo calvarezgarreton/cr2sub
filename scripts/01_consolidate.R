@@ -40,7 +40,7 @@ create_dir_if_not_exists(tmp_folder)
 create_dir_if_not_exists(out_folder)
 
 # List all XLS/XLSX files across input directories matching input/dga_xls_*
-input_dirs <- Sys.glob(file.path("input", "dga_xls_*"))
+input_dirs <- Sys.glob(file.path("input/DGA_GWL_observations", "dga_xls_*"))
 files <- unlist(lapply(input_dirs, function(d) {
   list.files(d, full.names = TRUE, pattern = "\\.(xls|xlsx)$", ignore.case = TRUE)
 }))
@@ -130,8 +130,8 @@ metadata_columns <- c(
   "dga_well_elev",
   "dga_well_lat",
   "dga_well_lon",
-  "dga_well_north",
-  "dga_well_east"
+  "dga_well_utm_north",
+  "dga_well_utm_east"
 )
 
 # Combine metadata from all files and sheets into one data.frame
@@ -172,8 +172,8 @@ details$cr2sub_id <- as.numeric(sub("-[0-9Kk]$", "", details$dga_well_code))
 details$dga_well_elev <- as.numeric(full_details$dga_well_elev)
 details$dga_well_lat <- unname(sapply(full_details$dga_well_lat, deg2dec))
 details$dga_well_lon <- unname(sapply(full_details$dga_well_lon, deg2dec))
-details$dga_well_north <- as.numeric(full_details$dga_well_north)
-details$dga_well_east <- as.numeric(full_details$dga_well_east)
+details$dga_well_utm_north <- as.numeric(full_details$dga_well_utm_north)
+details$dga_well_utm_east <- as.numeric(full_details$dga_well_utm_east)
 
 # -----------------------------------------------------------------------------
 # Section: Spatial validation – keep only stations within Chilean boundaries
@@ -255,12 +255,6 @@ colnames(ts_all) <- codigos_pozos
 coredata(ts_all)[ts_all <= 0] <- NA
 
 full_series <- -ts_all[, as.character(details_filtered$cr2sub_id)]
-
-# Save raw combined time series to CSV
-# df <- data.frame(date = time(full_series), coredata(full_series), check.names = FALSE)
-# write.csv(df, file.path(out_folder, paste0(tag_name, "_", version, "_raw.csv")), quote = FALSE, row.names = FALSE)
-
-
 
 # -----------------------------------------------------------------------------
 # Section: Monthly Aggregation

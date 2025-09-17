@@ -24,7 +24,14 @@ slope_file <- "input/other_data/slope_deg_fabdemv1.2_2015_300m_epsg4326.tif"
 pr_file <- "input/other_data/pr_mm_cr2metv2.5_ann_1960_2024_0.05deg_epsg4326.nc"
 pet_file <- "input/other_data/et0_mm_cr2met_2.5_ann_1960_2024_0.05deg_epsg4326.nc"
 snow_file <- "input/other_data/snow_mm_cr2met_2.5_ann_1960_2024_0.05deg_epsg4326.nc"
-clsoil_file <- "input/CLSoilMaps/cr2sub_CLSoilMap_data.csv"
+clsoil_file <- "input/CLSoilMaps/cr2sub_CLSoilMaps_data.csv"
+basin_camels <- vect("input/camels_cl_basins/catchments_camels_cl_v2021.shp")
+basin_bna <- vect("input/cuencas_BNA/cuencas_BNA.shp") |> project(y = "epsg:4326")
+join_table_camels_basins <- "input/other_data/cr2sub_v1_inner_join_with_camels_basins.csv"
+join_table_bna_basins <- "input/other_data/cr2sub_v1_inner_join_with_bna_basins.csv"
+
+gwl_ts_clean_file <- "cr2sub/cr2sub_v1_mon_clean.csv"
+gwl_ts_file <- "cr2sub/cr2sub_v1_mon.csv"
 
 # -----------------------------------------------------------------------------
 # lectura de metadatos y series
@@ -38,8 +45,8 @@ metadata_df <- data.frame(
   dga_well_subbasin = metadata_raw$dga_well_subbasin,
   dga_well_lat = as.numeric(metadata_raw$dga_well_lat),
   dga_well_lon = as.numeric(metadata_raw$dga_well_lon),
-  dga_well_utm_north = as.numeric(metadata_raw$dga_well_north),
-  dga_well_utm_east = as.numeric(metadata_raw$dga_well_east),
+  dga_well_utm_north = as.numeric(metadata_raw$dga_well_utm_north),
+  dga_well_utm_east = as.numeric(metadata_raw$dga_well_utm_east),
   dga_well_elev = as.numeric(metadata_raw$dga_well_elev),
   stringsAsFactors = FALSE
 )
@@ -95,11 +102,7 @@ pet_mean_rast <- mean_over_years(pet_file, 1980L, 2010L)
 snow_mean_rast <- mean_over_years(snow_file, 1980L, 2010L)
 
 
-
-
-
 # topography
-
 
 dem_vals <- terra::extract(dem_raster, well_vect)[, 2]
 slope_vals <- terra::extract(slope_raster, well_vect)[, 2]
@@ -108,22 +111,18 @@ metadata_df$cr2sub_elev <- dem_vals
 metadata_df$cr2sub_slp <- slope_vals
 
 
-# mean, sd and cv
-
-gwl_ts_file <- "cr2sub/cr2sub_v1_mon_clean.csv"
-gwl_ts_clean_file <- "cr2sub/cr2sub_v1_mon.csv"
+# mean, sd and cv of GWL time series
 
 gwl_ts <- read.csv.zoo(gwl_ts_file, check.names = FALSE)
 gwl_ts_clean <- read.csv.zoo(gwl_ts_clean_file, check.names = FALSE)
-
 
 mean_gwl <- apply(coredata(gwl_ts), 2, mean, na.rm = TRUE) [as.character(metadata_df$cr2sub_id)]
 sd_gwl <- apply(coredata(gwl_ts), 2, sd, na.rm = TRUE) [as.character(metadata_df$cr2sub_id)]
 cv_gwl <- (mean_gwl / sd_gwl)[as.character(metadata_df$cr2sub_id)]
 
-mean_gwl_clean <- apply(coredata(gwl_ts_clean), 2, mean, na.rm = TRUE)
-sd_gwl_clean <- apply(coredata(gwl_ts_clean), 2, sd, na.rm = TRUE)
-cv_gwl_clean <- mean_gwl_clean / sd_gwl_clean
+mean_gwl_clean <- apply(coredata(gwl_ts_clean), 2, mean, na.rm = TRUE)[as.character(metadata_df$cr2sub_id)]
+sd_gwl_clean <- apply(coredata(gwl_ts_clean), 2, sd, na.rm = TRUE)[as.character(metadata_df$cr2sub_id)]
+cv_gwl_clean <- mean_gwl_clean / sd_gwl_clean[as.character(metadata_df$cr2sub_id)]
 
 metadata_df$cr2sub_mean_gwl <- round(mean_gwl, 2)
 metadata_df$cr2sub_sd_gwl <- round(sd_gwl, 2)
@@ -135,21 +134,20 @@ metadata_df$cr2sub_clean_cv_gwl <- round(cv_gwl_clean, 2)
 
 # camels-cl related
 
-basin_camels <- vect("input/cuencas_camels_cl/cuencas_camels_cl_v1.shp")
+# Reemplazar por código que lea lookup table [RM], seleccionando la gauge_id de área más pequeña
 
-camels_ids <- create_well_area_join(
-  wells = well_vect,
-  polygons = basin_camels,
-  grid_resolution = 0.01,
-  use_buffer = FALSE,
-  match_ids = metadata_df$cr2sub_id
-)
+# camels_ids <- create_well_area_join(
+#   wells = well_vect,
+#   polygons = basin_camels,
+#   grid_resolution = 0.01,
+#   use_buffer = FALSE,
+#   match_ids = metadata_df$cr2sub_id
+# )
 
-camels_ids_char <- as.character(camels_ids)
+# camels_ids_char <- as.character(camels_ids)
 
 
 metadata_df$cr2sub_in_basin_camels <- camels_ids
-
 
 camels_pr_vals <- terra::extract(pr_mean_rast, basin_camels, fun = mean, na.rm = TRUE)[, 2] |> as.numeric()
 names(camels_pr_vals) <- as.data.frame(basin_camels)[, "gauge_id"] |> as.character()
@@ -176,18 +174,17 @@ metadata_df$cr2sub_camels_slp <- round(camels_slope_vals[camels_ids_char], 2)
 
 # bna related
 
-basin_bna <- vect("input/cuencas_BNA/cuencas_BNA.shp") |> project(y = "epsg:4326")
+# Reemplazar por código que lea lookup table [RM], seleccionando la gauge_id de área más pequeña
 
+# bna_ids <- create_well_area_join(
+#   wells = well_vect,
+#   polygons = basin_bna,
+#   grid_resolution = 0.01,
+#   use_buffer = TRUE,
+#   match_ids = metadata_df$cr2sub_id
+# )
 
-bna_ids <- create_well_area_join(
-  wells = well_vect,
-  polygons = basin_bna,
-  grid_resolution = 0.01,
-  use_buffer = TRUE,
-  match_ids = metadata_df$cr2sub_id
-)
-
-bna_ids_char <- as.character(bna_ids)
+# bna_ids_char <- as.character(bna_ids)
 
 
 metadata_df$cr2sub_in_basin_bna <- bna_ids
@@ -226,11 +223,9 @@ metadata_df$cr2sub_bna_elev <- round(bna_elev_vals[bna_ids_char], 2)
 metadata_df$cr2sub_bna_slp <- round(bna_slope_vals[bna_ids_char], 2)
 
 
+# CLSoilMaps
 
-# mean, sd y cv
-
-
-clsmap <- read.csv("input/CLSoilMaps/cr2sub_CLSoilMap_data.csv", row.names = 1)
+clsmap <- read.csv(clsoil_file, row.names = 1)
 
 clsmap <- clsmap[as.character(metadata_df$cr2sub_id), ]
 
@@ -258,24 +253,51 @@ metadata_df <- cbind.data.frame(metadata_df, clsmap)
 # -----------------------------------------------------------------------------
 required_order <- c(
   "cr2sub_id",
-  "dga_well_code", "dga_well_name", "dga_well_basin", "dga_well_subbasin",
-  "dga_well_lat", "dga_well_lon", "dga_well_utm_north", "dga_well_utm_east",
+  "dga_well_code", 
+  "dga_well_name", 
+  "dga_well_basin", 
+  "dga_well_subbasin",
+  "dga_well_lat", 
+  "dga_well_lon", 
+  "dga_well_utm_north", 
+  "dga_well_utm_east",
   "dga_well_elev",
-  "cr2sub_lat", "cr2sub_lon", "cr2sub_utm_north_h19", "cr2sub_utm_south_h19",
-  "cr2sub_elev", "cr2sub_slp",
-  "cr2sub_mean_gwl", "cr2sub_sd_gwl", "cr2sub_cv_gwl",
-  "cr2sub_clean_mean_gwl", "cr2sub_clean_sd_gwl", "cr2sub_clean_cv_gwl",
-  "cr2sub_in_basin_camels", "cr2sub_camels_pr_yr", "cr2sub_bna_pet_yr",
-  "cr2sub_camels_aridity", "cr2sub_camels_snowf", "cr2sub_camels_elev",
+  "cr2sub_lat", 
+  "cr2sub_lon", 
+  "cr2sub_utm_north_h19", 
+  "cr2sub_utm_south_h19",
+  "cr2sub_elev", 
+  "cr2sub_slp",
+  "cr2sub_mean_gwl", 
+  "cr2sub_sd_gwl", 
+  "cr2sub_cv_gwl",
+  "cr2sub_clean_mean_gwl", 
+  "cr2sub_clean_sd_gwl", 
+  "cr2sub_clean_cv_gwl",
+  "cr2sub_in_basin_camels", 
+  "cr2sub_camels_pr_yr", 
+  "cr2sub_bna_pet_yr",
+  "cr2sub_camels_aridity", 
+  "cr2sub_camels_snowf", 
+  "cr2sub_camels_elev",
   "cr2sub_camels_slp",
-  "cr2sub_in_basin_bna", "cr2sub_bna_pr_yr", "cr2sub_bna_pet_yr",
-  "cr2sub_bna_aridity", "cr2sub_bna_snowf", "cr2sub_bna_elev",
+  "cr2sub_in_basin_bna", 
+  "cr2sub_bna_pr_yr", 
+  "cr2sub_bna_pet_yr",
+  "cr2sub_bna_aridity", 
+  "cr2sub_bna_snowf", 
+  "cr2sub_bna_elev",
   "cr2sub_bna_slp",
-  "cr2sub_clsoilmap_awc_0_100cm", "cr2sub_clsoilmap_awc_100_200cm",
-  "cr2sub_clsoilmap_bulkd_0_100cm", "cr2sub_clsoilmap_bulkd_100_200cm",
-  "cr2sub_clsoilmap_clay_0_100cm", "cr2sub_clsoilmap_clay_100_200cm",
-  "cr2sub_clsoilmap_ksat_0_100cm", "cr2sub_clsoilmap_ksat_100_200cm",
-  "cr2sub_clsoilmap_sand_0_100cm", "cr2sub_clsoilmap_sand_100_200cm"
+  "cr2sub_clsoilmap_awc_0_100cm", 
+  "cr2sub_clsoilmap_awc_100_200cm",
+  "cr2sub_clsoilmap_bulkd_0_100cm", 
+  "cr2sub_clsoilmap_bulkd_100_200cm",
+  "cr2sub_clsoilmap_clay_0_100cm", 
+  "cr2sub_clsoilmap_clay_100_200cm",
+  "cr2sub_clsoilmap_ksat_0_100cm", 
+  "cr2sub_clsoilmap_ksat_100_200cm",
+  "cr2sub_clsoilmap_sand_0_100cm", 
+  "cr2sub_clsoilmap_sand_100_200cm"
 )
 
 cr2sub_attributes_df <- metadata_df[, required_order]
