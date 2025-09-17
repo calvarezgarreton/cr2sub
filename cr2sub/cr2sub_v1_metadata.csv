@@ -1,4 +1,4 @@
-"dga_well_code","dga_well_name","dga_well_basin","dga_well_subbasin","dga_well_elev","dga_well_lat","dga_well_lon","dga_well_north","dga_well_east","cr2sub_id"
+"dga_well_code","dga_well_name","dga_well_basin","dga_well_subbasin","dga_well_elev","dga_well_lat","dga_well_lon","dga_well_utm_north","dga_well_utm_east","cr2sub_id"
 "03434007-2","FUNDO PALERMO","RIO COPIAPO","Rio Copiapo Medio (entre R. Jorquera Q. Paipote)",496,-27.481111,-70.269167,6959592,374608,3434007
 "03451006-7","FUNDO SAN JUAN","RIO COPIAPO","Rio Copiapo Bajo (Entre Q. Paipote y Desemb.)",241,-27.316389,-70.5125,6977604,350338,3451006
 "03451007-5","FUNDO SAN PEDRO","RIO COPIAPO","Rio Copiapo Bajo (Entre Q. Paipote y Desemb.)",212,-27.332222,-70.563889,6975755,345279,3451007
