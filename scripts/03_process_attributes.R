@@ -9,7 +9,7 @@
 library(terra)
 library(zoo)
 
-source("scripts/functions/functions_process_attributes.R")
+source("scripts/functions/functions_process_cr2sub_attributes.R")
 
 tag <- "cr2sub"
 version <- "v1"
