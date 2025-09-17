@@ -1,26 +1,35 @@
 # CR2SUB: consolidated monthly groundwater level database for Chile
 
-The **CR2SUB** database compiles groundwater level (GWL) observations from 1,137 wells maintained by the Water Bureau of Chile (Dirección General de Aguas, DGA), downloaded from [DGA hydrometeorological data portal](https://snia.mop.gob.cl/BNAConsultas/reportes), and processed into a homogenized monthly database for the period **1957-2025**. The database also includes metadata for each observations well and a range of topographical and hydroclimatic attributes computed from ancillary information.  
+The **CR2SUB** database compiles groundwater level (GWL) observations from 1,137 wells maintained by the Water Bureau of Chile (Dirección General de Aguas, DGA), downloaded from [DGA hydrometeorological data portal](https://snia.mop.gob.cl/BNAConsultas/reportes), and processed into a homogenized monthly database for the period **1957-2025**. The database also includes metadata for each observation well and a range of topographical and hydroclimatic attributes computed from ancillary information.  
 
 This repository is structured in three main folders, explained in detail below: 
 - **cr2sub**: csv files with GWL timeseries, metadata and attributes
 - **input**: data used for processing the database
 - **scripts**: scripts used to process the database and to update cr2sub if new data from DGA is downloaded.
 
-All data and scripts are openly provided to ensure full reproducibility of results. Importantly, the workflow also enables users to update the CR2SUB database whenever new DGA records are downloaded. 
+All data and scripts are openly provided to ensure full reproducibility of results. The workflow also enables users to update the CR2SUB database whenever new DGA records are downloaded. 
 
-The CR2SUB database has been consolidated within the framework of the Center for Climate and Resilience Research (CR2, ANID/FONDAP/1523A0002) and is part of the research project ANID/FONDECYT/11240924. CR2SUB is distributed under the Creative Commons Attribution 4.0 International (CC BY 4.0) license. 
+**Developer**: The CR2SUB database has been consolidated within the framework of the Center for Climate and Resilience Research (CR2, ANID/FONDAP/1523A0002) and is part of the research project ANID/FONDECYT/11240924. Responsible: Camila Alvarez-Garreton. Colaborators: Rodrigo Marinao Rivas, Diego Dinamarca.
+
+**License**: This dataset is distributed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) license. 
+
+**Access**: [CR2SUB - Zenodo](https://zenodo.org/records/xxxxxxx); [CR2SUB - Github](https://github.com/calvarezgarreton/cr2sub)  
+
+**Citation**:  
+Zenodo: Álvarez-Garretón, C. (2025). *CR2SUB: Consolidated monthly groundwater level database for Chile* [Data set]. Zenodo. [https://doi.org/10.xxxx/zenodo.xxxxxx](https://doi.org/10.xxxx/zenodo.xxxxxx)<br>
+Article: Álvarez-Garretón, C., Boisier, J. P., Marinao, R., Barría, P., et al. (in prep./2025). *Recovery and memory of surface and groundwater systems after droughts in Chile*. *Hydrology and Earth System Sciences* (in prep.).  
+
 
 ## cr2sub
 
 **cr2sub_v1_mon.csv**<br>
- Consolidated monthly time series of raw groundwater level (GWL) observations. The raw observations were downloaded as xls spreadsheets from the [DGA website](https://snia.mop.gob.cl/BNAConsultas/reportes) and stored in the _input_ folder. When more than one record was available for a given month, the values were averaged to obtain a single monthly estimate.
+ Consolidated monthly time series of raw groundwater level (GWL) observations. Raw GLW observations were downloaded as xls spreadsheets from the [DGA website](https://snia.mop.gob.cl/BNAConsultas/reportes), stored in the _input_ folder and processed through the codes provided in _scripts_ folder. When more than one record was available for a given month, the values were averaged to obtain a single monthly estimate.
 
 **cr2sub_v1_mon_clean.csv**<br>
  Monthly time series after applying an outlier-removal procedure. The code used for outlier detection and removal is available in the _scripts_ folder.
 
 **cr2sub_v1_metadata.csv**<br>
-Metadata of the observations wells, including the following information provided in the xsl files downloaded from DGA website:
+Metadata of the observations wells, including the following information extracted from the xsl files downloaded from DGA website:
 <small>
 - cr2sub_id: unique observation well identifier in cr2sub database. The cr2sub_id is the same as the DGA well code, without the identification last digit.<br>
 - dga_well_code: unique observation well identifier in DGA database, as reported in the xls downloaded file.<br>
