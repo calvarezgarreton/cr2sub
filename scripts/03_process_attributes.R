@@ -19,37 +19,32 @@ source("scripts/functions/functions_process_cr2sub_attributes.R")
 # Section: Configuration
 # -----------------------------------------------------------------------------
 
-tag_name <- "cr2sub"
-version <- "v1"
-
-out_folder <- file.path(tag)
-
-create_dir_if_not_exists(out_folder)
+tag <- "cr2sub"
+version <- "v1.1"
+tmp_dir <- gsub("//", "/", tempdir())
+tmp_folder <- file.path(tmp_dir, "tmp")
 
 # -----------------------------------------------------------------------------
 # Section: Input Files
 # -----------------------------------------------------------------------------
 
 metadata_file <-
-  file.path(tag, paste0(tag, "_", version, "_metadata.csv"))
-
-well_ts_file <-
-  file.path(tag, paste0(tag, "_", version, "_mon_clean.csv"))
+  file.path(tmp_folder, paste0(tag, "_", version, "_metadata.csv"))
 
 dem_file <-
-  "input/other_data/dem_masl_fabdemv1.2_2015_300m_epsg4326.tif"
+  "input/dem/dem_masl_fabdemv1.2_2015_300m_epsg4326.tif"
 
 slope_file <-
-  "input/other_data/slope_deg_fabdemv1.2_2015_300m_epsg4326.tif" # degree
+  "input/dem/slope_deg_fabdemv1.2_2015_300m_epsg4326.tif" # degree
 
 pr_file <-
-  "input/other_data/pr_mm_cr2metv2.5_ann_1960_2024_0.05deg_epsg4326.nc"
+  "input/cr2met/pr_mm_cr2metv2.5_ann_1960_2024_0.05deg_epsg4326.nc"
 
 pet_file <-
-  "input/other_data/et0_mm_cr2met_2.5_ann_1960_2024_0.05deg_epsg4326.nc"
+  "input/cr2met/et0_mm_cr2met_2.5_ann_1960_2024_0.05deg_epsg4326.nc"
 
 snow_file <-
-  "input/other_data/snow_mm_cr2met_2.5_ann_1960_2024_0.05deg_epsg4326.nc"
+  "input/cr2met/snow_mm_cr2met_2.5_ann_1960_2024_0.05deg_epsg4326.nc"
 
 clsoil_file <-
   "input/CLSoilMaps/cr2sub_CLSoilMaps_data.csv"
@@ -62,7 +57,7 @@ basin_bna <-
 
 join_table_camels_basins <-
   sprintf(
-    "input/other_data/cr2sub_%s_join_table_with_camels_cl_basins.csv",
+    "input/other_data/cr2sub_%s_join_table_with_camels_cl_v2021_basins.csv",
     version
   )
 join_table_bna_basins <-
@@ -71,8 +66,8 @@ join_table_bna_basins <-
     version
   )
 
-gwl_ts_clean_file <- file.path(tag, paste0(tag, "_", version, "_mon_clean.csv"))
-gwl_ts_file <- file.path(tag, paste0(tag, "_", version, "_mon.csv"))
+gwl_ts_file <- file.path(tag, paste0(tag, "_", version, "_gwl_mon.csv"))
+gwl_ts_clean_file <- file.path(tag, paste0(tag, "_", version, "_gwl_mon_clean.csv"))
 
 # -----------------------------------------------------------------------------
 # Section: Load Metadata And Time Series
@@ -91,9 +86,6 @@ metadata_df <- data.frame(
   dga_well_utm_east = as.numeric(metadata_raw$dga_well_utm_east),
   dga_well_elev = as.numeric(metadata_raw$dga_well_elev)
 )
-
-well_ts <- read.csv(well_ts_file, stringsAsFactors = FALSE)
-well_ts$date <- as.Date(well_ts$date)
 
 # -----------------------------------------------------------------------------
 # Section: Derive Core Spatial Attributes

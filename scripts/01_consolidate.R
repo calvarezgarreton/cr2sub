@@ -23,12 +23,11 @@ source("scripts/functions/functions_consolidate_cr2sub.R")
 # Section: Configuration
 # -----------------------------------------------------------------------------
 
-tag_name <- "cr2sub"
-version <- "v1"
-
+tag <- "cr2sub"
+version <- "v1.1"
 tmp_dir <- gsub("//", "/", tempdir())
 tmp_folder <- file.path(tmp_dir, "tmp")
-out_folder <- file.path(tag_name)
+out_folder <- file.path(tag)
 
 create_dir_if_not_exists(tmp_folder)
 create_dir_if_not_exists(out_folder)
@@ -179,8 +178,8 @@ flag_details <- details$cr2sub_id %in% points_in_chile$cr2sub_id
 details_filtered <- details[flag_details, ]
 
 write.csv(details_filtered, file.path(
-  out_folder,
-  paste0(tag_name, "_", version, "_metadata.csv")
+  tmp_folder,
+  paste0(tag, "_", version, "_metadata.csv")
 ),
 row.names = FALSE
 )
@@ -247,7 +246,7 @@ df_mon <- data.frame(
 
 write.csv(
   df_mon,
-  file.path(out_folder, paste0(tag_name, "_", version, "_mon.csv")),
+  file.path(out_folder, paste0(tag, "_", version, "_gwl_mon.csv")),
   quote = FALSE,
   row.names = FALSE
 )
