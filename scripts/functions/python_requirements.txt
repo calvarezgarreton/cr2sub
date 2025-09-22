@@ -1,0 +1,7 @@
+numpy>=1.23
+pandas>=1.5
+scipy>=1.10
+matplotlib>=3.7
+seaborn>=0.12
+ipython>=8.12
+ipykernel>=6.26
