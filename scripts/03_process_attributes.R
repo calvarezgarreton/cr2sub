@@ -94,7 +94,7 @@ metadata_df <- data.frame(
 metadata_df$cr2sub_lat <- metadata_df$dga_well_lat
 metadata_df$cr2sub_lon <- metadata_df$dga_well_lon
 metadata_df$cr2sub_utm_north_h19 <- metadata_df$dga_well_utm_north
-metadata_df$cr2sub_utm_south_h19 <- metadata_df$dga_well_utm_east
+metadata_df$cr2sub_utm_east_h19 <- metadata_df$dga_well_utm_east
 
 well_vect <- vect(
   metadata_df,
@@ -168,7 +168,7 @@ sd_gwl <- apply(coredata(gwl_ts),
   na.rm = TRUE
 )[as.character(metadata_df$cr2sub_id)]
 
-cv_gwl <- (mean_gwl / sd_gwl)[as.character(metadata_df$cr2sub_id)]
+cv_gwl <- (sd_gwl / mean_gwl)[as.character(metadata_df$cr2sub_id)]
 
 mean_gwl_clean <- apply(coredata(gwl_ts_clean), 2,
   mean,
@@ -181,7 +181,7 @@ sd_gwl_clean <- apply(coredata(gwl_ts_clean), 2,
 )[as.character(metadata_df$cr2sub_id)]
 
 cv_gwl_clean <-
-  (mean_gwl_clean / sd_gwl_clean)[as.character(metadata_df$cr2sub_id)]
+  (sd_gwl_clean / mean_gwl_clean)[as.character(metadata_df$cr2sub_id)]
 
 metadata_df$cr2sub_mean_gwl <- round(mean_gwl, 2)
 metadata_df$cr2sub_sd_gwl <- round(sd_gwl, 2)
@@ -359,7 +359,7 @@ required_order <- c(
   "cr2sub_lat",
   "cr2sub_lon",
   "cr2sub_utm_north_h19",
-  "cr2sub_utm_south_h19",
+  "cr2sub_utm_east_h19",
   "cr2sub_elev",
   "cr2sub_slp",
   "cr2sub_mean_gwl",
