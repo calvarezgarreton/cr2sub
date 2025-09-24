@@ -17,7 +17,7 @@ All data and scripts are openly provided to ensure full reproducibility of resul
 
 **Citation**:  
 Zenodo: Alvarez-Garreton, C. (2025). *CR2SUB: Consolidated monthly groundwater level database for Chile* [Data set]. Zenodo. [https://doi.org/10.xxxx/zenodo.xxxxxx](https://doi.org/10.xxxx/zenodo.xxxxxx).<br>
-Article: Alvarez-Garreton, C., Boisier, J. P., Marinao, R., et al. (in prep./2025). *Recovery and memory of surface and groundwater systems after droughts in Chile*. *Hydrology and Earth System Sciences* (in prep.).  
+<!-- Article: Alvarez-Garreton, C., Boisier, J. P., Marinao, R., et al. (in prep./2025). *Recovery and memory of surface and groundwater systems after droughts in Chile*. *Hydrology and Earth System Sciences* (in prep.).   -->
 
 
 ## cr2sub
@@ -107,10 +107,9 @@ Elevation Model), available from [University of Bristol repository](https://data
 ## scripts
 This folder contains the scripts used to process the database. These can be run by users to update CR2SUB if new data from DGA is downloaded.
 
-**Environment setup for jupyter notebook**:
-
-Create or use the provided virtual environment and install dependencies:
-- macOS/Linux:
+**Python environment setup**:
+<!-- Create a virtual environment and install dependencies: -->
+<!-- - macOS/Linux:
     - `bash scripts/setup_env.sh`
 - Manual commands (if preferred):
     - `python3 -m venv .venv`
@@ -119,4 +118,4 @@ Create or use the provided virtual environment and install dependencies:
     - `.venv/bin/pip install -r requirements.txt`
     - `.venv/bin/python -m ipykernel install --user --name cr2sub-py311 --display-name "Python (cr2sub)"`
 
-In VS Code/Jupyter, select kernel: `.venv`.
+In VS Code/Jupyter, select kernel: `.venv`. -->
