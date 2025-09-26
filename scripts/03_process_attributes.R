@@ -21,15 +21,19 @@ source("scripts/functions/functions_process_cr2sub_attributes.R")
 
 tag <- "cr2sub"
 version <- "v1.1"
-tmp_dir <- gsub("//", "/", tempdir())
-tmp_folder <- file.path(tmp_dir, "tmp")
+project_tmp_dir <- file.path(".tmp")
+out_folder <- file.path(tag)
 
 # -----------------------------------------------------------------------------
 # Section: Input Files
 # -----------------------------------------------------------------------------
 
-metadata_file <-
-  file.path(tmp_folder, paste0(tag, "_", version, "_metadata.csv"))
+metadata_filename <- paste0(tag, "_", version, "_metadata.csv")
+metadata_file <- file.path(project_tmp_dir, metadata_filename)
+
+if (!file.exists(metadata_file)) {
+  stop("No se encontró el archivo de metadata esperado en .tmp.")
+}
 
 dem_file <-
   "input/dem/dem_masl_fabdemv1.2_2015_300m_epsg4326.tif"
@@ -38,13 +42,13 @@ slope_file <-
   "input/dem/slope_deg_fabdemv1.2_2015_300m_epsg4326.tif" # degree
 
 pr_file <-
-  "input/cr2met/pr_mm_cr2metv2.5_ann_1960_2024_0.05deg_epsg4326.nc"
+  "input/cr2met/pr_mm_cr2met_v2.5_ann_1960_2021_0.05deg_epsg4326.nc"
 
 pet_file <-
-  "input/cr2met/et0_mm_cr2met_2.5_ann_1960_2024_0.05deg_epsg4326.nc"
+  "input/cr2met/et0_mm_cr2met_v2.5_ann_1960_2021_0.05deg_epsg4326.nc"
 
-snow_file <-
-  "input/cr2met/snow_mm_cr2met_2.5_ann_1960_2024_0.05deg_epsg4326.nc"
+sf_file <-
+  "input/cr2met/sf_mm_cr2met_v2.5_ann_1979_2021_0.05deg_epsg4326.nc"
 
 clsoil_file <-
   "input/CLSoilMaps/cr2sub_CLSoilMaps_data.csv"
@@ -66,8 +70,9 @@ join_table_bna_basins <-
     version
   )
 
-gwl_ts_file <- file.path(tag, paste0(tag, "_", version, "_gwl_mon.csv"))
-gwl_ts_clean_file <- file.path(tag, paste0(tag, "_", version, "_gwl_mon_clean.csv"))
+gwl_ts_file <- file.path(out_folder, paste0(tag, "_", version, "_gwl_mon.csv"))
+gwl_ts_clean_file <-
+  file.path(out_folder, paste0(tag, "_", version, "_gwl_mon_clean.csv"))
 
 # -----------------------------------------------------------------------------
 # Section: Load Metadata And Time Series
@@ -138,7 +143,7 @@ mean_over_years <- function(file_path, start_year, end_year) {
 
 pr_mean_rast <- mean_over_years(pr_file, 1980L, 2010L)
 pet_mean_rast <- mean_over_years(pet_file, 1980L, 2010L)
-snow_mean_rast <- mean_over_years(snow_file, 1980L, 2010L)
+sf_mean_rast <- mean_over_years(sf_file, 1980L, 2010L)
 
 # -----------------------------------------------------------------------------
 # Section: Topographic Attributes At Wells
@@ -220,11 +225,11 @@ camels_pet_vals <-
 names(camels_pet_vals) <-
   as.data.frame(basin_camels)[, "gauge_id"] |> as.character()
 
-camels_snow_vals <- terra::extract(snow_mean_rast, basin_camels,
+camels_sf_vals <- terra::extract(sf_mean_rast, basin_camels,
   fun = mean, na.rm = TRUE
 )[, 2] |> as.numeric()
 
-names(camels_snow_vals) <-
+names(camels_sf_vals) <-
   as.data.frame(basin_camels)[, "gauge_id"] |> as.character()
 
 camels_elev_vals <- terra::extract(dem_raster,
@@ -245,8 +250,8 @@ names(camels_slope_vals) <-
 
 metadata_df$cr2sub_camels_pr_yr <- round(camels_pr_vals[camels_ids], 2)
 metadata_df$cr2sub_camels_pet_yr <- round(camels_pet_vals[camels_ids], 2)
-metadata_df$cr2sub_camels_snowf <-
-  round(camels_snow_vals[camels_ids] / camels_pr_vals[camels_ids], 2)
+metadata_df$cr2sub_camels_sff <-
+  round(camels_sf_vals[camels_ids] / camels_pr_vals[camels_ids], 2)
 metadata_df$cr2sub_camels_aridity <-
   round(camels_pet_vals[camels_ids] / camels_pr_vals[camels_ids], 2)
 metadata_df$cr2sub_camels_elev <- round(camels_elev_vals[camels_ids], 2)
@@ -283,12 +288,12 @@ names(bna_pet_vals) <-
   as.data.frame(basin_bna)[, "COD_CUEN"] |>
   as.numeric()
 
-bna_snow_vals <- terra::extract(snow_mean_rast,
+bna_sf_vals <- terra::extract(sf_mean_rast,
   basin_bna,
   fun = mean, na.rm = TRUE
 )[, 2] |> as.numeric()
 
-names(bna_snow_vals) <-
+names(bna_sf_vals) <-
   as.data.frame(basin_bna)[, "COD_CUEN"] |> as.numeric()
 
 bna_elev_vals <- terra::extract(dem_raster,
@@ -309,8 +314,8 @@ names(bna_slope_vals) <-
 
 metadata_df$cr2sub_bna_pr_yr <- round(bna_pr_vals[bna_ids], 2)
 metadata_df$cr2sub_bna_pet_yr <- round(bna_pet_vals[bna_ids], 2)
-metadata_df$cr2sub_bna_snowf <-
-  round(bna_snow_vals[bna_ids] / bna_pr_vals[bna_ids], 2)
+metadata_df$cr2sub_bna_sff <-
+  round(bna_sf_vals[bna_ids] / bna_pr_vals[bna_ids], 2)
 metadata_df$cr2sub_bna_aridity <-
   round(bna_pet_vals[bna_ids] / bna_pr_vals[bna_ids], 2)
 metadata_df$cr2sub_bna_elev <- round(bna_elev_vals[bna_ids], 2)
@@ -372,14 +377,14 @@ required_order <- c(
   "cr2sub_camels_pr_yr",
   "cr2sub_camels_pet_yr",
   "cr2sub_camels_aridity",
-  "cr2sub_camels_snowf",
+  "cr2sub_camels_sff",
   "cr2sub_camels_elev",
   "cr2sub_camels_slp",
   "cr2sub_in_basin_bna",
   "cr2sub_bna_pr_yr",
   "cr2sub_bna_pet_yr",
   "cr2sub_bna_aridity",
-  "cr2sub_bna_snowf",
+  "cr2sub_bna_sff",
   "cr2sub_bna_elev",
   "cr2sub_bna_slp",
   "cr2sub_clsoilmap_awc_0_100cm",
@@ -408,3 +413,10 @@ message(
   "Dimensiones finales: ", nrow(cr2sub_attributes_df), " pozos x ",
   ncol(cr2sub_attributes_df), " atributos"
 )
+
+if (file.exists(output_file)) {
+  file_info <- file.info(output_file)
+  if (!is.na(file_info$size) && file_info$size > 0 && dir.exists(project_tmp_dir)) {
+    unlink(project_tmp_dir, recursive = TRUE)
+  }
+}

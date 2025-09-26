@@ -25,12 +25,13 @@ source("scripts/functions/functions_consolidate_cr2sub.R")
 
 tag <- "cr2sub"
 version <- "v1.1"
-tmp_dir <- gsub("//", "/", tempdir())
-tmp_folder <- file.path(tmp_dir, "tmp")
 out_folder <- file.path(tag)
+project_tmp_dir <- file.path(".tmp")
+system_tmp_dir <- file.path(tempdir(), "cr2sub")
 
-create_dir_if_not_exists(tmp_folder)
 create_dir_if_not_exists(out_folder)
+create_dir_if_not_exists(project_tmp_dir)
+create_dir_if_not_exists(system_tmp_dir)
 
 # -----------------------------------------------------------------------------
 # Section: Discover Input Files
@@ -71,7 +72,7 @@ for (file_idx in seq_along(files)) {
         sheets_details[[sheet_idx]] <- processed_data$metadata
 
         dga_well_code <- substr(xls[6, 3], 1, 10)
-        pozo_dir <- file.path(tmp_folder, dga_well_code)
+        pozo_dir <- file.path(system_tmp_dir, dga_well_code)
 
         create_dir_if_not_exists(pozo_dir)
 
@@ -178,7 +179,7 @@ flag_details <- details$cr2sub_id %in% points_in_chile$cr2sub_id
 details_filtered <- details[flag_details, ]
 
 write.csv(details_filtered, file.path(
-  tmp_folder,
+  project_tmp_dir,
   paste0(tag, "_", version, "_metadata.csv")
 ),
 row.names = FALSE
@@ -188,13 +189,17 @@ row.names = FALSE
 # Section: Merge Time Series By Well
 # -----------------------------------------------------------------------------
 
-wells_out <- list.dirs(tmp_folder, recursive = FALSE, full.names = FALSE)
+wells_dirs <- list.dirs(system_tmp_dir, recursive = FALSE, full.names = TRUE)
+wells_dirs <- wells_dirs[wells_dirs != system_tmp_dir]
+wells_out <- basename(wells_dirs)
 nombres_pozos <- wells_out
 codigos_pozos <- rep(NA, length(wells_out))
 
 for (pozo_idx in seq_along(wells_out)) {
   folder_out <- wells_out[pozo_idx]
-  files_out <- list.files(file.path(tmp_folder, folder_out), full.names = TRUE)
+  files_out <- list.files(file.path(system_tmp_dir, folder_out),
+    full.names = TRUE
+  )
 
   for (file_idx in seq_along(files_out)) {
     file_out <- files_out[file_idx]
