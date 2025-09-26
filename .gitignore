@@ -1,2 +1,14 @@
 # macOS Finder metadata files
-.DS_Store
+**/.DS_Store
+
+# Python virtual environments
+**/.venv/
+
+# Python cache directories
+**/__pycache__/
+
+# Temp folder
+**/.tmp/
+
+# Review folder
+review
