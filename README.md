@@ -1,4 +1,4 @@
-# CR2SUB: consolidated monthly groundwater level database for Chile
+# CR2SUB: monthly groundwater level database for Chile
 
 The **CR2SUB** database compiles groundwater level (GWL) observations from 1,137 wells maintained by the Water Bureau of Chile (Dirección General de Aguas, DGA), downloaded from [DGA hydrometeorological data portal](https://snia.mop.gob.cl/BNAConsultas/reportes), and processed into a homogenized monthly database for the period **1957-2025**. The database also includes metadata for each observation well and a range of topographical and hydroclimatic attributes computed from ancillary information.  
 
@@ -13,11 +13,9 @@ All data and scripts are openly provided to ensure full reproducibility of resul
 
 **License**: This dataset is distributed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) license. 
 
-**Access**: [CR2SUB - Zenodo](https://zenodo.org/records/xxxxxxx); [CR2SUB - GitHub](https://github.com/calvarezgarreton/cr2sub).  
+ **Citation**:  
+Zenodo: Alvarez-Garreton, C. (2025). *CR2SUB: monthly groundwater level database for Chile* [Data set]. Zenodo. [https://doi.org/10.5281/zenodo.15851099](https://doi.org/10.5281/zenodo.15851099).<br>
 
-**Citation**:  
-Zenodo: Alvarez-Garreton, C. (2025). *CR2SUB: Consolidated monthly groundwater level database for Chile* [Data set]. Zenodo. [https://doi.org/10.xxxx/zenodo.xxxxxx](https://doi.org/10.xxxx/zenodo.xxxxxx).<br>
-<!-- Article: Alvarez-Garreton, C., Boisier, J. P., Marinao, R., et al. (in prep./2025). *Recovery and memory of surface and groundwater systems after droughts in Chile*. *Hydrology and Earth System Sciences* (in prep.).   -->
 
 
 ## cr2sub
@@ -46,7 +44,7 @@ Metadata of the observation wells extracted from the _.xls_ files downloaded fro
 - cr2sub_utm_north_h19: latitude of the well (_m, zone 19S_). The original DGA coordinate was corrected in some cases.<br>
 - cr2sub_utm_east_h19: longitude of the well (_m, zone 19S_). The original DGA coordinate was corrected in some cases.<br>
 - cr2sub_elev: elevation of the well location (cr2sub_lat, cr2sub_lon) in _m a.s.l._, computed from FABDEM (Forest And Buildings removed copernicus Digital Elevation Model), available from [University of Bristol repository](https://data.bris.ac.uk/data/dataset/s5hqmjcdj8yo2ibzi9b4ew3sn), resampled at 300-m.<br>	
-- cr2sub_slp: slope of the well location (cr2sub_lat, cr2sub_lon) in _%_ [**** rodrigo please chequear****], computed from FABDEM.<br>	
+- cr2sub_slp: slope of the well location (cr2sub_lat, cr2sub_lon) in _degree_, computed from FABDEM resampled at 300-m.<br>	
 - cr2sub_mean_gwl: mean depth of GWL (_m_), computed for all available records in _cr2sub_v1.1_gwl_mon.csv_.<br>
 - cr2sub_sd_gwl: standard deviation of GWL (_m_), computed for all available records in _cr2sub_v1.1_gwl_mon.csv_.<br>
 - cr2sub_cv_gwl: coefficient of variation of GWL (_-_), computed as cr2sub_sd_gwl/cr2sub_mean_gwl.<br>
@@ -59,14 +57,14 @@ Metadata of the observation wells extracted from the _.xls_ files downloaded fro
 - cr2sub_camels_pr_yr: mean annual precipitation (_mm_) of the CAMELS-CL basin where the well is located, computed based on CR2MET v2.5 for 1980-2010. CR2MET v2.5 daily data were downloaded from https://ftp.cr2.cl/browse/cr2met/v2.5 and processed into annual values (_input_).<br>  
 - cr2sub_camels_pet_yr: mean annual potential evapotranspiration (_mm_) of the CAMELS-CL basin where the well is located, computed based on CR2MET v2.5 for 1980-2010.<br>  
 - cr2sub_camels_aridity: aridity index of the CAMELS-CL basin where the well is located, computed as cr2sub_camels_pet_yr/cr2sub_camels_pr_yr.<br>  
-- cr2sub_camels_snowf: snow fraction (_-_) of the CAMELS-CL basin where the well is located, computed based on CR2MET v2.5 for 1980-2010.<br>  
+- cr2sub_camels_snowf: snow fraction (_-_) of the CAMELS-CL basin where the well is located, computed as the ratio of mean annual snowfall (_mm_) to mean annual precipitation (_mm_) for 1980-2010, based on CR2MET v2.5 data.<br>  
 - cr2sub_in_basin_bna: id from the smallest BNA basin where the well is located. The basin was identified by intersecting the well location (cr2sub_lat, cr2sub_lon) with BNA polygons downloaded from [DGA spatial data repository](https://dga.mop.gob.cl/mapoteca-digital/) and stored as a lookup table in _input_.<br>  
 - cr2sub_bna_elev: mean elevation (_m a.s.l._) of the BNA basin where the well is located, computed based on FABDEM resampled at 300-m.<br>  
 - cr2sub_bna_slp: mean slope (_degree_) of the BNA basin where the well is located, computed based on FABDEM resampled at 300-m.<br>  
 - cr2sub_bna_pr_yr: mean annual precipitation (_mm_) of the BNA basin where the well is located, computed based on CR2MET v2.5 for 1980-2010<br>	
 - cr2sub_bna_pet_yr: mean annual potential evapotranspiration (_mm_) of the BNA basin where the well is located, computed based CR2MET v2.5 for 1980-2010<br>  
 - cr2sub_bna_aridity: aridity index of the BNA basin where the well is located, computed as cr2sub_bna_pet_yr/cr2sub_bna_pr_yr<br>  	
-- cr2sub_bna_snowf: snow fraction (_-_) of the BNA basin where the well is located, computed based on CR2MET v2.5 for 1980-2010.<br> 
+- cr2sub_bna_snowf: snow fraction (_-_) of the BNA basin where the well is located, computed as the ratio of mean annual snowfall (_mm_) to mean annual precipitation (_mm_) for 1980-2010, based on CR2MET v2.5 data.<br>  
 - cr2sub_clsoilmap_awc_0_100cm: available water content (_mm_) in soil horizon 0-100 cm at well location (cr2sub_lat, cr2sub_lon), computed from [CLSoilMaps database](https://www.nature.com/articles/s41597-023-02536-x), and stored in _input_. <br> 
 - cr2sub_clsoilmap_awc_100_200cm: available water content (_mm_) in soil horizon 100-200 cm at well location, computed from CLSoilMaps. <br>  
 - cr2sub_clsoilmap_ksat_0_100cm: hydraulic conductivity (_cm/day_) in soil horizon 0-100 cm at well location, computed from CLSoilMaps. <br>  
@@ -86,10 +84,9 @@ Metadata of the observation wells extracted from the _.xls_ files downloaded fro
 
 **CLSoilmaps**: soil data computed from [CLSoilMaps database](https://www.nature.com/articles/s41597-023-02536-x). 
 
-**cr2met**: precipitation, potential evapotranspiration and snow fraction data downloaded from https://ftp.cr2.cl/browse/cr2met/v2.5 and processed into annual values.
+**cr2met**: precipitation, potential evapotranspiration and snowfall data v2.5 downloaded from https://ftp.cr2.cl/browse/cr2met/v2.5 and processed into annual values.
 
-**dem**: elevation and slope data obtained from FABDEM (Forest And Buildings removed copernicus Digital
-Elevation Model), available from [University of Bristol repository](https://data.bris.ac.uk/data/dataset/s5hqmjcdj8yo2ibzi9b4ew3sn), resampled at 300-m.<br>
+**dem**: elevation and slope data obtained from FABDEM (Forest And Buildings removed copernicus Digital Elevation Model), available from [University of Bristol repository](https://data.bris.ac.uk/data/dataset/s5hqmjcdj8yo2ibzi9b4ew3sn), resampled at 300-m.<br>
 
 **DGA_GWL_observations**: raw GWL observations downloaded as _.xls_ spreadsheets from the [DGA website](https://snia.mop.gob.cl/BNAConsultas/reportes).
 <small>
@@ -107,7 +104,11 @@ Elevation Model), available from [University of Bristol repository](https://data
 ## scripts
 This folder contains the scripts used to process the database. These can be run by users to update CR2SUB if new data from DGA is downloaded.
 
-**Python environment setup**:
+To run the scripts 01, 02 and 03 sequentially, run the main pipeline in the terminal:
+
+python3 scripts/main_pipeline.py
+
+<!-- **Python environment setup**: -->
 <!-- Create a virtual environment and install dependencies: -->
 <!-- - macOS/Linux:
     - `bash scripts/setup_env.sh`

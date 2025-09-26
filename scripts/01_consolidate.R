@@ -1,8 +1,7 @@
 # -----------------------------------------------------------------------------
 # Script: 01_consolidate.R
 # Purpose: Consolidate groundwater level XLS files from DGA, extracting metadata
-#   and time series to build monthly aggregates, backfill missing months, and
-#   export curated outputs for CR2SUB.
+#   and time series to build monthly aggregates.
 # Author: Rodrigo Marinao Rivas, Camila Alvarez Garretón
 # Date: [2025-07-08]
 # Updated : [2025-09-16]

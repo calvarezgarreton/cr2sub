@@ -250,7 +250,7 @@ names(camels_slope_vals) <-
 
 metadata_df$cr2sub_camels_pr_yr <- round(camels_pr_vals[camels_ids], 2)
 metadata_df$cr2sub_camels_pet_yr <- round(camels_pet_vals[camels_ids], 2)
-metadata_df$cr2sub_camels_sff <-
+metadata_df$cr2sub_camels_sf <-
   round(camels_sf_vals[camels_ids] / camels_pr_vals[camels_ids], 2)
 metadata_df$cr2sub_camels_aridity <-
   round(camels_pet_vals[camels_ids] / camels_pr_vals[camels_ids], 2)
@@ -314,7 +314,7 @@ names(bna_slope_vals) <-
 
 metadata_df$cr2sub_bna_pr_yr <- round(bna_pr_vals[bna_ids], 2)
 metadata_df$cr2sub_bna_pet_yr <- round(bna_pet_vals[bna_ids], 2)
-metadata_df$cr2sub_bna_sff <-
+metadata_df$cr2sub_bna_sf <-
   round(bna_sf_vals[bna_ids] / bna_pr_vals[bna_ids], 2)
 metadata_df$cr2sub_bna_aridity <-
   round(bna_pet_vals[bna_ids] / bna_pr_vals[bna_ids], 2)
@@ -377,14 +377,14 @@ required_order <- c(
   "cr2sub_camels_pr_yr",
   "cr2sub_camels_pet_yr",
   "cr2sub_camels_aridity",
-  "cr2sub_camels_sff",
+  "cr2sub_camels_sf",
   "cr2sub_camels_elev",
   "cr2sub_camels_slp",
   "cr2sub_in_basin_bna",
   "cr2sub_bna_pr_yr",
   "cr2sub_bna_pet_yr",
   "cr2sub_bna_aridity",
-  "cr2sub_bna_sff",
+  "cr2sub_bna_sf",
   "cr2sub_bna_elev",
   "cr2sub_bna_slp",
   "cr2sub_clsoilmap_awc_0_100cm",
