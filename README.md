@@ -7,15 +7,14 @@ This repository is structured in three main folders, explained in detail below:
 - **input**: data used for processing the database.
 - **scripts**: scripts used to process the database.
 
-All data and scripts are openly provided to ensure full reproducibility of results. The workflow also enables users to update the CR2SUB database whenever new DGA records are downloaded. 
+Data and scripts are openly provided to ensure reproducibility of results. The workflow enables users to update the CR2SUB database whenever new DGA records are downloaded. 
 
 **Developer**: The CR2SUB database has been consolidated within the framework of the Center for Climate and Resilience Research (CR2, ANID/FONDAP/1523A0002) and is part of the research project ANID/FONDECYT/11240924. Responsible: Camila Alvarez-Garreton. Collaborators: Rodrigo Marinao Rivas, Diego Dinamarca.
 
 **License**: This dataset is distributed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) license. 
 
- **Citation**:  
-Zenodo: Alvarez-Garreton, C. (2025). *CR2SUB: monthly groundwater level database for Chile* [Data set]. Zenodo. [https://doi.org/10.5281/zenodo.15851099](https://doi.org/10.5281/zenodo.15851099).<br>
-
+ **Citation**: Alvarez Garreton, C., & Marinao, R. (2025). CR2SUB: monthly groundwater level database for Chile [Data set]. Zenodo. [https://doi.org/10.5281/zenodo.15851099](https://doi.org/10.5281/zenodo.15851099).<br>
+<!-- Article: Streamflow and groundwater recovery after droughts in Chile (*in prep*) -->
 
 
 ## cr2sub
@@ -27,7 +26,7 @@ Zenodo: Alvarez-Garreton, C. (2025). *CR2SUB: monthly groundwater level database
  Monthly time series after applying an outlier-removal procedure. The code for outlier detection and removal is available in _scripts_.
 
 **cr2sub_v1.1_attributes.csv**<br>
-Metadata of the observation wells extracted from the _.xls_ files downloaded from DGA website (_input_), and a range of climatic, topographical and pedological attributes computed from on ancillary information (available in _input_):
+Metadata of the observation wells extracted from the _.xls_ files downloaded from DGA website (_input_), and climatic, topographical and soil attributes computed from on ancillary information (available in _input_):
 <small>
 - cr2sub_id: unique observation well identifier in cr2sub database. The cr2sub_id is the same as the DGA well code, without the identification last digit.<br>
 - dga_well_code: unique observation well identifier in DGA database, as reported in the _.xls_ downloaded file.<br>
@@ -57,20 +56,20 @@ Metadata of the observation wells extracted from the _.xls_ files downloaded fro
 - cr2sub_camels_pr_yr: mean annual precipitation (_mm_) of the CAMELS-CL basin where the well is located, computed based on CR2MET v2.5 for 1980-2010. CR2MET v2.5 daily data were downloaded from https://ftp.cr2.cl/browse/cr2met/v2.5 and processed into annual values (_input_).<br>  
 - cr2sub_camels_pet_yr: mean annual potential evapotranspiration (_mm_) of the CAMELS-CL basin where the well is located, computed based on CR2MET v2.5 for 1980-2010.<br>  
 - cr2sub_camels_aridity: aridity index of the CAMELS-CL basin where the well is located, computed as cr2sub_camels_pet_yr/cr2sub_camels_pr_yr.<br>  
-- cr2sub_camels_snowf: snow fraction (_-_) of the CAMELS-CL basin where the well is located, computed as the ratio of mean annual snowfall (_mm_) to mean annual precipitation (_mm_) for 1980-2010, based on CR2MET v2.5 data.<br>  
+- cr2sub_camels_sf: snow fraction (_-_) of the CAMELS-CL basin where the well is located, computed as the ratio of mean annual snowfall (_mm_) to mean annual precipitation (_mm_) for 1980-2010, based on CR2MET v2.5 data.<br>  
 - cr2sub_in_basin_bna: id from the smallest BNA basin where the well is located. The basin was identified by intersecting the well location (cr2sub_lat, cr2sub_lon) with BNA polygons downloaded from [DGA spatial data repository](https://dga.mop.gob.cl/mapoteca-digital/) and stored as a lookup table in _input_.<br>  
 - cr2sub_bna_elev: mean elevation (_m a.s.l._) of the BNA basin where the well is located, computed based on FABDEM resampled at 300-m.<br>  
 - cr2sub_bna_slp: mean slope (_degree_) of the BNA basin where the well is located, computed based on FABDEM resampled at 300-m.<br>  
 - cr2sub_bna_pr_yr: mean annual precipitation (_mm_) of the BNA basin where the well is located, computed based on CR2MET v2.5 for 1980-2010<br>	
 - cr2sub_bna_pet_yr: mean annual potential evapotranspiration (_mm_) of the BNA basin where the well is located, computed based CR2MET v2.5 for 1980-2010<br>  
 - cr2sub_bna_aridity: aridity index of the BNA basin where the well is located, computed as cr2sub_bna_pet_yr/cr2sub_bna_pr_yr<br>  	
-- cr2sub_bna_snowf: snow fraction (_-_) of the BNA basin where the well is located, computed as the ratio of mean annual snowfall (_mm_) to mean annual precipitation (_mm_) for 1980-2010, based on CR2MET v2.5 data.<br>  
+- cr2sub_bna_sf: snow fraction (_-_) of the BNA basin where the well is located, computed as the ratio of mean annual snowfall (_mm_) to mean annual precipitation (_mm_) for 1980-2010, based on CR2MET v2.5 data.<br>  
 - cr2sub_clsoilmap_awc_0_100cm: available water content (_mm_) in soil horizon 0-100 cm at well location (cr2sub_lat, cr2sub_lon), computed from [CLSoilMaps database](https://www.nature.com/articles/s41597-023-02536-x), and stored in _input_. <br> 
 - cr2sub_clsoilmap_awc_100_200cm: available water content (_mm_) in soil horizon 100-200 cm at well location, computed from CLSoilMaps. <br>  
 - cr2sub_clsoilmap_ksat_0_100cm: hydraulic conductivity (_cm/day_) in soil horizon 0-100 cm at well location, computed from CLSoilMaps. <br>  
 - cr2sub_clsoilmap_ksat_100_200cm: hydraulic conductivity (_cm/day_) in soil horizon 100-200 cm at well location, computed from CLSoilMaps. <br>  
 - cr2sub_clsoilmap_bulkd_0_100cm: bulk density (_g/cm³_) in soil horizon 0-100 cm at well location, computed from CLSoilMaps. <br>  
-- cr2sub_clsoilmap_bulkd_100_200cm: bulk density (_g/cm³_)in soil horizon 100-200 cm at well location, computed from CLSoilMaps. <br>  
+- cr2sub_clsoilmap_bulkd_100_200cm: bulk density (_g/cm³_) in soil horizon 100-200 cm at well location, computed from CLSoilMaps. <br>  
 - cr2sub_clsoilmap_clay_0_100cm: clay content (_%_) in soil horizon 0-100 cm at well location, computed from CLSoilMaps. <br>   
 - cr2sub_clsoilmap_clay_100_200cm: clay content (_%_) in soil horizon 100-200 cm at well location, computed from CLSoilMaps. <br>  
 - cr2sub_clsoilmap_sand_0_100cm: sand content (_%_) in soil horizon 0-100 cm at well location, computed from CLSoilMaps. <br>   
