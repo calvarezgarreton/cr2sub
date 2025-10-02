@@ -102,21 +102,6 @@ Metadata of the observation wells extracted from the _.xls_ files downloaded fro
 </small>
 
 ## scripts
-This folder contains the scripts used to process the database. These can be run by users to update CR2SUB if new data from DGA is downloaded.
-
-To run the scripts 01, 02 and 03 sequentially, run the main pipeline in the terminal:
-
+This folder contains the scripts used to process the database. These can be run by users to update CR2SUB if new data from DGA is downloaded. To run the scripts 01, 02 and 03 sequentially, run the main pipeline in the terminal: 
+```bash 
 python3 scripts/main_pipeline.py
-
-<!-- **Python environment setup**: -->
-<!-- Create a virtual environment and install dependencies: -->
-<!-- - macOS/Linux:
-    - `bash scripts/setup_env.sh`
-- Manual commands (if preferred):
-    - `python3 -m venv .venv`
-    - `.venv/bin/python -m ensurepip --upgrade`
-    - `.venv/bin/pip install -U pip`
-    - `.venv/bin/pip install -r requirements.txt`
-    - `.venv/bin/python -m ipykernel install --user --name cr2sub-py311 --display-name "Python (cr2sub)"`
-
-In VS Code/Jupyter, select kernel: `.venv`. -->
