@@ -65,9 +65,9 @@ def main() -> None:
     scripts_dir = script_path.parent
     project_root = scripts_dir.parent
 
-    run_r_script(project_root / "scripts/01_consolidate.R", project_root)
+    run_r_script(project_root / "scripts_v1.1/01_consolidate.R", project_root)
     execute_notebook(scripts_dir / "02_remove_outliers.ipynb", scripts_dir)
-    run_r_script(project_root / "scripts/03_process_attributes.R", project_root)
+    run_r_script(project_root / "scripts_v1.1/03_process_attributes.R", project_root)
 
 
 if __name__ == "__main__":

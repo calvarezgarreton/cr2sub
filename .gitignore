@@ -10,5 +10,8 @@
 # Temp folder
 **/.tmp/
 
-# Review folder
-review
+# pending notes
+notas
+
+# figures folder
+figures

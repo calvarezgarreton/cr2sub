@@ -16,7 +16,7 @@ library(zoo)
 library(terra)
 
 # Load custom helper functions for directory creation, coordinate conversion
-source("scripts/functions/functions_consolidate_cr2sub.R")
+source("scripts_v1.1/functions/functions_consolidate_cr2sub.R")
 
 # -----------------------------------------------------------------------------
 # Section: Configuration

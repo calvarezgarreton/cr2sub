@@ -13,7 +13,7 @@
 library(terra)
 library(zoo)
 
-source("scripts/functions/functions_process_cr2sub_attributes.R")
+source("scripts_v1.1/functions/functions_process_cr2sub_attributes.R")
 
 # -----------------------------------------------------------------------------
 # Section: Configuration
@@ -61,12 +61,12 @@ basin_bna <-
 
 join_table_camels_basins <-
   sprintf(
-    "input/other_data/cr2sub_%s_join_table_with_camels_cl_v2021_basins.csv",
+    "input/cr2sub_basin_lookup_tables/cr2sub_%s_join_table_with_camels_cl_v2021_basins.csv",
     version
   )
 join_table_bna_basins <-
   sprintf(
-    "input/other_data/cr2sub_%s_join_table_with_bna_basins.csv",
+    "input/cr2sub_basin_lookup_tables/cr2sub_%s_join_table_with_bna_basins.csv",
     version
   )
 
