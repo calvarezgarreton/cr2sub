@@ -186,7 +186,7 @@ sd_gwl_clean <- apply(coredata(gwl_ts_clean), 2,
 )[as.character(metadata_df$cr2sub_id)]
 
 cv_gwl_clean <-
-  (sd_gwl_clean / mean_gwl_clean)[as.character(metadata_df$cr2sub_id)]
+  (sd_gwl_clean / abs(mean_gwl_clean))[as.character(metadata_df$cr2sub_id)]
 
 metadata_df$cr2sub_mean_gwl <- round(mean_gwl, 2)
 metadata_df$cr2sub_sd_gwl <- round(sd_gwl, 2)
