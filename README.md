@@ -9,11 +9,11 @@ This repository is structured in three main folders, explained in detail below:
 
 Data and scripts are openly provided to ensure reproducibility of results. The workflow enables users to update the CR2SUB database whenever new DGA records are downloaded. 
 
-**Developer**: The CR2SUB database has been consolidated within the framework of the Center for Climate and Resilience Research (CR2, ANID/FONDAP/1523A0002) and is part of the research project ANID/FONDECYT/11240924. Responsible: Camila Alvarez-Garreton. Collaborators: Rodrigo Marinao Rivas, Diego Dinamarca.
+**Developer**: The CR2SUB database has been consolidated within the framework of the Center for Climate and Resilience Research (CR2, ANID/FONDAP/1523A0002) and is part of the research project ANID/FONDECYT/11240924. Responsible: Camila Alvarez-Garreton. Collaborators: Rodrigo Marinao Rivas, Juan P. Boisier, Diego Dinamarca.
 
 **License**: This dataset is distributed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) license. 
 
- **Citation**: Alvarez Garreton, C., & Marinao, R. (2025). CR2SUB: monthly groundwater level database for Chile [Data set]. Zenodo. [https://doi.org/10.5281/zenodo.15851099](https://doi.org/10.5281/zenodo.15851099).<br>
+ **Citation**: Alvarez-Garreton, C., Marinao, R., Boisier, J. P., & Dinamarca, D. (2025). CR2SUB: monthly groundwater level database for Chile (v1.1) [Data set]. Zenodo. https://doi.org/10.5281/zenodo.17591525
 <!-- Article: Streamflow and groundwater recovery after droughts in Chile (*in prep*) -->
 
 
