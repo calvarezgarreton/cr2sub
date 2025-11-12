@@ -46,10 +46,10 @@ Metadata of the observation wells extracted from the _.xls_ files downloaded fro
 - cr2sub_slp: slope of the well location (cr2sub_lat, cr2sub_lon) in _degree_, computed from FABDEM resampled at 300-m.<br>	
 - cr2sub_mean_gwl: mean depth of GWL (_m_), computed for all available records in _cr2sub_v1.1_gwl_mon.csv_.<br>
 - cr2sub_sd_gwl: standard deviation of GWL (_m_), computed for all available records in _cr2sub_v1.1_gwl_mon.csv_.<br>
-- cr2sub_cv_gwl: coefficient of variation of GWL (_-_), computed as cr2sub_sd_gwl/cr2sub_mean_gwl.<br>
+- cr2sub_cv_gwl: coefficient of variation of GWL (_-_), computed as cr2sub_sd_gwl/abs(cr2sub_mean_gwl).<br>
 - cr2sub_mean_gwl_clean: mean depth of GWL without outliers (_m_), computed for all available data in _cr2sub_v1.1_gwl_mon_clean.csv_.<br>
 - cr2sub_sd_gwl_clean: standard deviation of GWL without outliers (_m_), computed for all available data in _cr2sub_v1.1_gwl_mon_clean.csv_.<br>	
-- cr2sub_cv_gwl_clean: coefficient of variation of GWL without outliers (_-_), computed as cr2sub_sd_gwl_clean/cr2sub_mean_gwl_clean.<br>	
+- cr2sub_cv_gwl_clean: coefficient of variation of GWL without outliers (_-_), computed as cr2sub_sd_gwl_clean/abs(cr2sub_mean_gwl_clean).<br>	
 - cr2sub_in_basin_camels: gauge_id from the smallest CAMELS-CL basin where the well is located. The basin was identified by intersecting the well location (cr2sub_lat, cr2sub_lon) with CAMELS-CL v2021 polygons and stored as a lookup table in _input_.<br>  
 - cr2sub_camels_elev: mean elevation (_m a.s.l._) of the CAMELS-CL basin where the well is located, computed based on FABDEM resampled at 300-m.<br>  
 - cr2sub_camels_slp: mean slope (_degree_) of the CAMELS-CL basin where the well is located, computed based on FABDEM resampled at 300-m.<br>  
@@ -81,9 +81,9 @@ Metadata of the observation wells extracted from the _.xls_ files downloaded fro
 
 **camels_cl_basins**: shapefile with CAMELS-CL v2021 basins boundaries downloaded from [CAMELS-CL platform](https://www.camels.cr2.cl/).<br>  
 
-**CLSoilmaps**: soil data computed from [CLSoilMaps database](https://www.nature.com/articles/s41597-023-02536-x). 
+**CLSoilMaps**: soil data computed from [CLSoilMaps database](https://www.nature.com/articles/s41597-023-02536-x). 
 
-**cr2met**: precipitation, potential evapotranspiration and snowfall data v2.5 downloaded from https://ftp.cr2.cl/browse/cr2met/v2.5 and processed into annual values.
+**cr2met**: precipitation, potential evapotranspiration and snowfall data v2.5 downloaded from https://ftp.cr2.cl/browse/cr2met/v2.5 and processed into monthly values.
 
 **dem**: elevation and slope data obtained from FABDEM (Forest And Buildings removed copernicus Digital Elevation Model), available from [University of Bristol repository](https://data.bris.ac.uk/data/dataset/s5hqmjcdj8yo2ibzi9b4ew3sn), resampled at 300-m.<br>
 
