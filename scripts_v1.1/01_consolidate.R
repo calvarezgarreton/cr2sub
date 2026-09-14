@@ -36,7 +36,7 @@ create_dir_if_not_exists(system_tmp_dir)
 # Section: Discover Input Files
 # -----------------------------------------------------------------------------
 
-input_dirs <- Sys.glob(file.path("input/DGA_GWL_observations", "dga_xls_*"))
+input_dirs <- Sys.glob(file.path("input/DGA_GWL_obs_downloaded", "dga_xls_*"))
 
 files <- unlist(lapply(input_dirs, function(d) {
   list.files(d,
@@ -46,7 +46,7 @@ files <- unlist(lapply(input_dirs, function(d) {
 }))
 
 if (length(files) == 0) {
-  stop(sprintf("No se encontraron archivos en %s", "input/dga_xls_*"))
+  stop(sprintf("No se encontraron archivos en %s", "input/DGA_GWL_obs_downloaded/dga_xls_*"))
 }
 
 # -----------------------------------------------------------------------------
