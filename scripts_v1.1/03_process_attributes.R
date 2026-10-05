@@ -57,7 +57,7 @@ basin_camels <-
   vect("input/camels_cl_basins/catchments_camels_cl_v2021.shp")
 
 basin_bna <-
-  vect("input/BNA_basins/cuencas_BNA.shp") |> project(y = "epsg:4326")
+  vect("input/BNA_basins/Cuencas_BNA.shp") |> project(y = "epsg:4326")
 
 join_table_camels_basins <-
   sprintf(

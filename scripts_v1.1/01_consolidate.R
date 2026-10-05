@@ -33,79 +33,70 @@ create_dir_if_not_exists(project_tmp_dir)
 create_dir_if_not_exists(system_tmp_dir)
 
 # -----------------------------------------------------------------------------
-# Section: Discover Input Files
+# Section: Discover Input File
 # -----------------------------------------------------------------------------
 
-input_dirs <- Sys.glob(file.path("input/DGA_GWL_obs_descarga", "dga_xls_*"))
+input_file <- file.path("input/DGA_GWL_obs_descarga", "AM006T0034616_1.xlsx")
 
-files <- unlist(lapply(input_dirs, function(d) {
-  list.files(d,
-    full.names = TRUE, pattern = "\\.(xls|xlsx)$",
-    ignore.case = TRUE
-  )
-}))
-
-if (length(files) == 0) {
-  stop(sprintf("No se encontraron archivos en %s", "input/DGA_GWL_obs_descarga/dga_xls_*"))
+if (!file.exists(input_file)) {
+  stop(sprintf("No se encontró el archivo %s", input_file))
 }
 
 # -----------------------------------------------------------------------------
-# Section: Extract Time Series And Metadata By File
+# Section: Extract Time Series And Metadata
 # -----------------------------------------------------------------------------
 
-files_details <- vector(mode = "list", length = length(files))
+raw <- suppressMessages(as.data.frame(read_excel(input_file, sheet = 1)))
 
-for (file_idx in seq_along(files)) {
-  file <- files[file_idx]
-  sheets <- excel_sheets(path = file)
-  sheets_details <- vector(mode = "list", length = length(sheets))
+colnames(raw) <- c(
+  "dga_well_name", "dga_well_code", "dga_well_province", "dga_well_commune",
+  "dga_well_basin", "dga_well_subbasin", "dga_well_subsubbasin",
+  "dga_well_utm_north", "dga_well_utm_east", "dga_well_lat_raw",
+  "dga_well_lon_raw", "dga_well_elev", "fecha_raw", "nivel"
+)
 
-  for (sheet_idx in seq_along(sheets)) {
-    sheet <- sheets[sheet_idx]
+raw$fecha <- as.Date(trimws(raw$fecha_raw), format = "%d-%m-%Y")
+raw$nivel <- as.numeric(raw$nivel)
 
-    tryCatch(
-      {
-        xls <- suppressMessages(as.data.frame(read_excel(file, sheet = sheet)))
-        processed_data <- process_excel_sheet(xls, sheet)
+valid_rows <- !is.na(raw$dga_well_code) & !is.na(raw$fecha) & !is.na(raw$nivel)
+raw <- raw[valid_rows, ]
 
-        sheets_details[[sheet_idx]] <- processed_data$metadata
+# Average duplicate (well, date) measurements before building each series
+raw_series <- aggregate(
+  nivel ~ dga_well_code + fecha,
+  data = raw,
+  FUN = mean
+)
 
-        dga_well_code <- substr(xls[6, 3], 1, 10)
-        pozo_dir <- file.path(system_tmp_dir, dga_well_code)
+well_codes <- unique(raw_series$dga_well_code)
 
-        create_dir_if_not_exists(pozo_dir)
+for (code_idx in seq_along(well_codes)) {
+  dga_well_code <- well_codes[code_idx]
+  well_rows <- raw_series[raw_series$dga_well_code == dga_well_code, ]
 
-        df_out <- data.frame(
-          fecha = processed_data$dates,
-          nivel = processed_data$data
-        )
-        colnames(df_out)[2] <- dga_well_code
+  pozo_dir <- file.path(system_tmp_dir, dga_well_code)
+  create_dir_if_not_exists(pozo_dir)
 
-        file_out <- file.path(
-          pozo_dir,
-          sprintf(
-            "Nivel_%s_%s_%s.csv",
-            dga_well_code,
-            min(processed_data$dates),
-            max(processed_data$dates)
-          )
-        )
+  df_out <- data.frame(
+    fecha = well_rows$fecha,
+    nivel = well_rows$nivel
+  )
+  colnames(df_out)[2] <- dga_well_code
 
-        write.csv(df_out, file_out, row.names = FALSE)
-      },
-      error = function(e) {
-        warning(sprintf(
-          "Error procesando archivo %s, hoja %s: %s",
-          file, sheet, e$message
-        ))
-      }
+  file_out <- file.path(
+    pozo_dir,
+    sprintf(
+      "Nivel_%s_%s_%s.csv",
+      dga_well_code,
+      min(df_out$fecha),
+      max(df_out$fecha)
     )
-  }
+  )
 
-  files_details[[file_idx]] <- sheets_details
+  write.csv(df_out, file_out, row.names = FALSE)
 
-  progress <- 100 * file_idx / length(files)
-  cat(sprintf("Avance: %.1f%% (%d/%d)\n", progress, file_idx, length(files)))
+  progress <- 100 * code_idx / length(well_codes)
+  cat(sprintf("Avance: %.1f%% (%d/%d)\n", progress, code_idx, length(well_codes)))
   flush.console()
 }
 
@@ -113,52 +104,24 @@ for (file_idx in seq_along(files)) {
 # Section: Consolidate Metadata
 # -----------------------------------------------------------------------------
 
-metadata_columns <- c(
-  "dga_well_code",
-  "dga_well_name",
-  "dga_well_basin",
-  "dga_well_subbasin",
-  "dga_well_elev",
-  "dga_well_lat",
-  "dga_well_lon",
-  "dga_well_utm_north",
-  "dga_well_utm_east"
+first_rows <- raw[!duplicated(raw$dga_well_code), ]
+
+full_details <- data.frame(
+  dga_well_code = first_rows$dga_well_code,
+  dga_well_name = first_rows$dga_well_name,
+  dga_well_basin = first_rows$dga_well_basin,
+  dga_well_subbasin = first_rows$dga_well_subbasin,
+  dga_well_elev = as.numeric(first_rows$dga_well_elev),
+  dga_well_lat = unname(sapply(first_rows$dga_well_lat_raw, deg2dec_compact)),
+  dga_well_lon = unname(sapply(first_rows$dga_well_lon_raw, deg2dec_compact)),
+  dga_well_utm_north = as.numeric(first_rows$dga_well_utm_north),
+  dga_well_utm_east = as.numeric(first_rows$dga_well_utm_east),
+  stringsAsFactors = FALSE
 )
-
-files_details_list <- lapply(files_details, function(details) {
-  df_details <- as.data.frame(matrix(NA,
-    ncol = length(metadata_columns),
-    nrow = length(details)
-  ))
-  colnames(df_details) <- metadata_columns
-
-  for (j in seq_along(details)) {
-    df_details[j, ] <- details[[j]]
-  }
-  df_details
-})
-
-df_details_raw <- do.call("rbind.data.frame", files_details_list)
-df_details_prov <- df_details_raw[!is.na(df_details_raw[, 1]), ]
-
-index_keep <- !duplicated(apply(
-  df_details_prov[, c("dga_well_code", "dga_well_name")],
-  FUN = paste,
-  MARGIN = 1,
-  collapse = ""
-))
-
-full_details <- df_details_prov[index_keep, ]
-rownames(full_details) <- full_details[, "dga_well_code"]
+rownames(full_details) <- full_details$dga_well_code
 
 details <- full_details
-
 details$cr2sub_id <- as.numeric(sub("-[0-9Kk]$", "", details$dga_well_code))
-details$dga_well_elev <- as.numeric(full_details$dga_well_elev)
-details$dga_well_lat <- unname(sapply(full_details$dga_well_lat, deg2dec))
-details$dga_well_lon <- unname(sapply(full_details$dga_well_lon, deg2dec))
-details$dga_well_utm_north <- as.numeric(full_details$dga_well_utm_north)
-details$dga_well_utm_east <- as.numeric(full_details$dga_well_utm_east)
 
 # -----------------------------------------------------------------------------
 # Section: Spatial Validation

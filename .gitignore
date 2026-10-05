@@ -15,3 +15,6 @@ notas
 
 # figures folder
 figures
+
+# internal review scripts/outputs, not part of the published pipeline
+review_dga_xlsx_migration
