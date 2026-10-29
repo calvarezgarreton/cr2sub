@@ -17,4 +17,4 @@ notas
 figures
 
 # internal review scripts/outputs, not part of the published pipeline
-review_dga_xlsx_migrationreview_dga_xlsx_migration/outputs/
+review_dga_xlsx_migration/outputs/
