@@ -17,6 +17,19 @@ Data and scripts are openly provided to ensure reproducibility of results. The w
 <!-- Article: Streamflow and groundwater recovery after droughts in Chile (*in prep*) -->
 
 
+## Versions
+
+Each version of CR2SUB lives in its own long-lived branch; folder and script paths are the same in all of them (see [docs/versionado_por_ramas.md](docs/versionado_por_ramas.md)). Use `git switch <branch>` to move between versions.
+
+| Branch | Content |
+|---|---|
+| `main` | Common documentation (no product version) |
+| `cr2sub_v1.1` | v1.1, published release (Zenodo) |
+| `cr2sub_v1.2` | v1.2 (in preparation) |
+| `cr2sub_v1.3` | v1.3, DGA transparency data update (October 2026) |
+
+Data in `input/` may differ between branches; each branch documents what it needs.
+
 ## cr2sub
 
 **cr2sub_v1.1_gwl_mon.csv**<br>
