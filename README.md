@@ -1,6 +1,6 @@
 # CR2SUB: monthly groundwater level database for Chile
 
-The **CR2SUB** database compiles groundwater level (GWL) observations from 1,137 wells maintained by the Water Bureau of Chile (Dirección General de Aguas, DGA), downloaded from [DGA hydrometeorological data portal](https://snia.mop.gob.cl/BNAConsultas/reportes), and processed into a homogenized monthly database for the period **1957-2025**. The database also includes metadata for each observation well and a range of topographical and hydroclimatic attributes computed from ancillary information.  
+The **CR2SUB** database compiles groundwater level (GWL) observations from 1,137 wells maintained by the Water Bureau of Chile (Dirección General de Aguas, DGA), obtained from [DGA hydrometeorological data portal](https://snia.mop.gob.cl/BNAConsultas/reportes), and processed into a homogenized monthly database for the period **1957-2025**. The database also includes metadata for each observation well and a range of topographical and hydroclimatic attributes computed from ancillary information.  
 
 This repository is structured in three main folders, explained in detail below: 
 - **cr2sub**: csv files with GWL time series and well attributes.
@@ -19,23 +19,22 @@ Data and scripts are openly provided to ensure reproducibility of results. The w
 
 ## Versions
 
-Each version of CR2SUB lives in its own long-lived branch; folder and script paths are the same in all of them (see [docs/versionado_por_ramas.md](docs/versionado_por_ramas.md)). Use `git switch <branch>` to move between versions.
+Each version of CR2SUB lives in its own long-lived branch; folder and script paths are the same in all of them (see [versionado_por_ramas.md](versionado_por_ramas.md)). Use `git switch <branch>` to move between versions.
 
 | Branch | Content |
 |---|---|
 | `main` | Common documentation (no product version) |
 | `cr2sub_v1.1` | v1.1, published release (Zenodo) |
-| `cr2sub_v1.2` | v1.2 (in preparation) |
-| `cr2sub_v1.3` | v1.3, DGA transparency data update (October 2026) |
+| `cr2sub_v1.2` | v1.2  DGA transparency data update (October 2026) |
 
 Data in `input/` may differ between branches; each branch documents what it needs.
 
 ## cr2sub
 
-**cr2sub_v1.1_gwl_mon.csv**<br>
+**cr2sub_v1.x_gwl_mon.csv**<br>
  Consolidated monthly time series of raw groundwater level (GWL) observations. Raw GWL observations were downloaded as _.xls_ spreadsheets from the [DGA website](https://snia.mop.gob.cl/BNAConsultas/reportes), stored in _input_ and processed through the codes provided in _scripts_. When more than one record was available for a given month, the values were averaged to obtain a single monthly estimate.
 
-**cr2sub_v1.1_gwl_mon_clean.csv**<br>
+**cr2sub_v1.x_gwl_mon_clean.csv**<br>
  Monthly time series after applying an outlier-removal procedure. The code for outlier detection and removal is available in _scripts_.
 
 **cr2sub_v1.1_attributes.csv**<br>
