@@ -4,7 +4,7 @@ input) against the points the new source (AM006T0034616_1.xlsx) adds on top
 of it. Picks the well with the richest history among those with the most
 extension-period coverage, unless WELL_CODE is overridden below.
 
-Writes a PNG into ../outputs/evidence/.
+Writes a PNG into ../comparison_v1.1_vs_v1.3/.
 """
 import csv
 from pathlib import Path
@@ -17,10 +17,10 @@ import numpy as np
 from datetime import datetime
 
 HERE = Path(__file__).resolve().parent
-OUT_DIR = HERE.parent / "outputs"
-BASELINE_DIR = OUT_DIR / "baseline_old_input"
-NEW_DIR = OUT_DIR / "new_output"
-EVIDENCE_DIR = OUT_DIR / "evidence"
+ROOT = HERE.parent
+V11_DIR = ROOT / "versions" / "v1.1"  # input viejo: reportes dga_xls_*
+V13_DIR = ROOT / "versions" / "v1.3"  # input nuevo: AM006T0034616_1.xlsx
+EVIDENCE_DIR = ROOT / "comparison_v1.1_vs_v1.3"
 
 WELL_CODE = "5423019"
 
@@ -49,8 +49,8 @@ def load_series(path, well):
 
 
 def main():
-    dates_old, vals_old = load_series(BASELINE_DIR / "cr2sub_v1.1_gwl_mon.csv", WELL_CODE)
-    dates_new, vals_new = load_series(NEW_DIR / "cr2sub_v1.1_gwl_mon.csv", WELL_CODE)
+    dates_old, vals_old = load_series(V11_DIR / "cr2sub_v1.1_gwl_mon.csv", WELL_CODE)
+    dates_new, vals_new = load_series(V13_DIR / "cr2sub_v1.1_gwl_mon.csv", WELL_CODE)
 
     old_by_date = {d: v for d, v in zip(dates_old, vals_old) if v is not None}
     new_by_date = {d: v for d, v in zip(dates_new, vals_new) if v is not None}

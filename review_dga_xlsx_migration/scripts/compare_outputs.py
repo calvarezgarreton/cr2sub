@@ -2,8 +2,8 @@
 """Compare cr2sub outputs built from the old input/DGA_GWL_obs_descarga/dga_xls_*
 report folders against outputs built from the single AM006T0034616_1.xlsx export.
 
-Reads the two output snapshots kept in ../outputs/{baseline_old_input,new_output}
-and writes evidence files (CSVs + console summary) into ../outputs/evidence/.
+Reads the two output snapshots kept in ../versions/{v1.1,v1.3}
+and writes evidence files (CSVs + console summary) into ../comparison_v1.1_vs_v1.3/.
 
 Usage:
     python3 compare_outputs.py
@@ -12,10 +12,10 @@ import csv
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-OUT_DIR = HERE.parent / "outputs"
-BASELINE_DIR = OUT_DIR / "baseline_old_input"
-NEW_DIR = OUT_DIR / "new_output"
-EVIDENCE_DIR = OUT_DIR / "evidence"
+ROOT = HERE.parent
+V11_DIR = ROOT / "versions" / "v1.1"  # input viejo: reportes dga_xls_*
+V13_DIR = ROOT / "versions" / "v1.3"  # input nuevo: AM006T0034616_1.xlsx
+EVIDENCE_DIR = ROOT / "comparison_v1.1_vs_v1.3"
 
 
 def load_csv(path):
@@ -37,8 +37,8 @@ def is_na(v):
 
 def compare_timeseries(name):
     """Compare a date-indexed, well-column CSV (gwl_mon.csv / gwl_mon_clean.csv)."""
-    h_old, d_old = load_indexed(BASELINE_DIR / name)
-    h_new, d_new = load_indexed(NEW_DIR / name)
+    h_old, d_old = load_indexed(V11_DIR / name)
+    h_new, d_new = load_indexed(V13_DIR / name)
 
     idx_old = {c: i for i, c in enumerate(h_old)}
     idx_new = {c: i for i, c in enumerate(h_new)}
@@ -83,8 +83,8 @@ def compare_timeseries(name):
 
 
 def compare_attributes():
-    h_old, d_old = load_indexed(BASELINE_DIR / "cr2sub_v1.1_attributes.csv")
-    h_new, d_new = load_indexed(NEW_DIR / "cr2sub_v1.1_attributes.csv")
+    h_old, d_old = load_indexed(V11_DIR / "cr2sub_v1.1_attributes.csv")
+    h_new, d_new = load_indexed(V13_DIR / "cr2sub_v1.1_attributes.csv")
 
     idx_old = {c: i for i, c in enumerate(h_old)}
     idx_new = {c: i for i, c in enumerate(h_new)}
@@ -121,7 +121,7 @@ def compare_attributes():
 
 def pick_extension_examples(ts_result, n=3):
     """Pick a few wells that show data in the newly-extended tail (post Dec-2024)."""
-    h_new, d_new = load_indexed(NEW_DIR / ts_result["name"])
+    h_new, d_new = load_indexed(V13_DIR / ts_result["name"])
     idx_new = {c: i for i, c in enumerate(h_new)}
     extension_dates = sorted(dt for dt in d_new if dt > "2024-12")
     examples = []
