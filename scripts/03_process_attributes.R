@@ -13,7 +13,7 @@
 library(terra)
 library(zoo)
 
-source("scripts_v1.1/functions/functions_process_cr2sub_attributes.R")
+source("scripts/functions/functions_process_cr2sub_attributes.R")
 
 # -----------------------------------------------------------------------------
 # Section: Configuration
