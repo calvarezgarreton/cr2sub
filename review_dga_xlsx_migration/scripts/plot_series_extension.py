@@ -50,7 +50,7 @@ def load_series(path, well):
 
 def main():
     dates_old, vals_old = load_series(V11_DIR / "cr2sub_v1.1_gwl_mon.csv", WELL_CODE)
-    dates_new, vals_new = load_series(V13_DIR / "cr2sub_v1.1_gwl_mon.csv", WELL_CODE)
+    dates_new, vals_new = load_series(V13_DIR / "cr2sub_v1.3_gwl_mon.csv", WELL_CODE)
 
     old_by_date = {d: v for d, v in zip(dates_old, vals_old) if v is not None}
     new_by_date = {d: v for d, v in zip(dates_new, vals_new) if v is not None}

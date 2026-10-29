@@ -35,10 +35,10 @@ def is_na(v):
     return v == "" or v == "NA"
 
 
-def compare_timeseries(name):
+def compare_timeseries(stem):
     """Compare a date-indexed, well-column CSV (gwl_mon.csv / gwl_mon_clean.csv)."""
-    h_old, d_old = load_indexed(V11_DIR / name)
-    h_new, d_new = load_indexed(V13_DIR / name)
+    h_old, d_old = load_indexed(V11_DIR / f"cr2sub_v1.1_{stem}.csv")
+    h_new, d_new = load_indexed(V13_DIR / f"cr2sub_v1.3_{stem}.csv")
 
     idx_old = {c: i for i, c in enumerate(h_old)}
     idx_new = {c: i for i, c in enumerate(h_new)}
@@ -67,7 +67,7 @@ def compare_timeseries(name):
                     conflicts.append((w, dt, vo, vn))
 
     result = {
-        "name": name,
+        "name": stem,
         "wells_old": len(cols_old),
         "wells_new": len(cols_new),
         "wells_only_old": sorted(cols_old - cols_new),
@@ -84,7 +84,7 @@ def compare_timeseries(name):
 
 def compare_attributes():
     h_old, d_old = load_indexed(V11_DIR / "cr2sub_v1.1_attributes.csv")
-    h_new, d_new = load_indexed(V13_DIR / "cr2sub_v1.1_attributes.csv")
+    h_new, d_new = load_indexed(V13_DIR / "cr2sub_v1.3_attributes.csv")
 
     idx_old = {c: i for i, c in enumerate(h_old)}
     idx_new = {c: i for i, c in enumerate(h_new)}
@@ -121,7 +121,7 @@ def compare_attributes():
 
 def pick_extension_examples(ts_result, n=3):
     """Pick a few wells that show data in the newly-extended tail (post Dec-2024)."""
-    h_new, d_new = load_indexed(V13_DIR / ts_result["name"])
+    h_new, d_new = load_indexed(V13_DIR / f"cr2sub_v1.3_{ts_result['name']}.csv")
     idx_new = {c: i for i, c in enumerate(h_new)}
     extension_dates = sorted(dt for dt in d_new if dt > "2024-12")
     examples = []
@@ -141,8 +141,8 @@ def pick_extension_examples(ts_result, n=3):
 def main():
     EVIDENCE_DIR.mkdir(parents=True, exist_ok=True)
 
-    mon = compare_timeseries("cr2sub_v1.1_gwl_mon.csv")
-    mon_clean = compare_timeseries("cr2sub_v1.1_gwl_mon_clean.csv")
+    mon = compare_timeseries("gwl_mon")
+    mon_clean = compare_timeseries("gwl_mon_clean")
     attrs = compare_attributes()
     ext_dates, ext_examples = pick_extension_examples(mon)
 

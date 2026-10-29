@@ -20,7 +20,7 @@ source("scripts/functions/functions_process_cr2sub_attributes.R")
 # -----------------------------------------------------------------------------
 
 tag <- "cr2sub"
-version <- "v1.1"
+version <- "v1.3"
 project_tmp_dir <- file.path(".tmp")
 out_folder <- file.path(tag)
 

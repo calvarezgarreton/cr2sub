@@ -12,8 +12,8 @@ from matplotlib.colors import LinearSegmentedColormap
 from pathlib import Path
 W=Path(__file__).resolve().parent.parent.as_posix()+'/'; R=Path(W).parent.as_posix()+'/'
 def load(v):
-    a=pd.read_csv(W+f'versions/{v}/cr2sub_v1.1_attributes.csv',dtype={'cr2sub_id':str})
-    g=pd.read_csv(W+f'versions/{v}/cr2sub_v1.1_gwl_mon.csv',parse_dates=['date']).set_index('date')
+    a=pd.read_csv(W+f'versions/{v}/cr2sub_{v}_attributes.csv',dtype={'cr2sub_id':str})
+    g=pd.read_csv(W+f'versions/{v}/cr2sub_{v}_gwl_mon.csv',parse_dates=['date']).set_index('date')
     g.columns=g.columns.astype(str); return a,g[g.index>='2020-01-01'].notna()
 a1,h1=load('v1.1'); a3,h3=load('v1.3')
 att=pd.concat([a1,a3]).drop_duplicates('cr2sub_id')

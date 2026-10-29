@@ -8,9 +8,9 @@
 | Input DGA | 844 reportes `dga_xls_*` por pozo | export único `AM006T0034616_1.xlsx` |
 | Carpeta de outputs | `versions/v1.1/` | `versions/v1.3/` |
 
-Los CSV de ambas carpetas se llaman `cr2sub_v1.1_*` porque la variable
-`version` de los scripts sigue en `"v1.1"` en la rama v1.3; la versión de
-cada conjunto la da la carpeta, no el nombre del archivo. Los resultados de
+Los CSV de cada carpeta llevan la versión en el nombre
+(`cr2sub_v1.1_*` y `cr2sub_v1.3_*`), según la variable `version` de los
+scripts de cada rama. Los resultados de
 la comparación (v1.1 → v1.3) están en `comparison_v1.1_vs_v1.3/`.
 
 **Objetivo:** reemplazar `input/DGA_GWL_obs_descarga/dga_xls_*` (844 reportes
@@ -97,7 +97,7 @@ por pozo (huecos rellenados + serie extendida).
 | `gwl_mon_clean.csv` | igual | igual |
 
 Ejemplo concreto — pozo `5423019` (el de mayor cobertura reciente), serie
-mensual completa (`cr2sub_v1.1_gwl_mon.csv`), generada con
+mensual completa (`cr2sub_v1.3_gwl_mon.csv`), generada con
 [`scripts/plot_series_extension.py`](scripts/plot_series_extension.py):
 
 ![Serie de tiempo pozo 5423019: registro existente en azul, puntos agregados por la actualización en naranja](comparison_v1.1_vs_v1.3/series_extension_5423019.png)

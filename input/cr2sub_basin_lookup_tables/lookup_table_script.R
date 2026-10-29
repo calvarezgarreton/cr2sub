@@ -94,6 +94,6 @@ if (!dir.exists(subdir)) dir.create(subdir)
 
 write.csv(
   inner_join,
-  paste0("cr2sub_v1.1_join_table_with_", type, ".csv"),
+  paste0("cr2sub_v1.3_join_table_with_", type, ".csv"),
   row.names = FALSE
 )
