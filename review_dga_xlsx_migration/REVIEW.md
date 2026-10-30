@@ -163,11 +163,82 @@ archivo único es, en la práctica, un superset de las 3 carpetas viejas
 (mismos valores donde coinciden, más puntos donde antes había huecos),
 salvo los 4 pozos privados fuera del export del portal.
 
+## 6. Atributos columna a columna (1133 pozos en común)
+
+Generado con [`scripts/compare_attributes.py`](scripts/compare_attributes.py)
+(`comparison_v1.1_vs_v1.2/attribute_column_diffs.csv`). De las 45 columnas de
+`attributes.csv`, solo `cr2sub_id` es idéntica; los cambios se agrupan así:
+
+| Grupo | Pozos que cambian | Causa |
+|---|---|---|
+| `dga_well_basin` / `subbasin` / `name` | 1133 / 712 / 45 | La DGA cambió el formato del texto (`RIO COPIAPO` → `R.  Copiapo`; `EL TRANSITO` → `POZO EL TRANSITO`). No es un cambio de ubicación |
+| Coordenadas y cota `dga_*` / `cr2sub_*` | 14 a 33 según columna | Re-levantamientos en la base DGA (sección 2). Arrastran `cr2sub_elev` y `cr2sub_slp` (14 pozos) |
+| `cr2sub_mean/sd/cv_gwl` (raw y clean) | 61 a 142 | Más meses de datos por pozo (secciones 3 y 5) |
+| `cr2sub_*camels*` | 273 cambian de cuenca, 77 pasan de NA a tener cuenca, 1 pasa a NA | Cambio de CAMELS-CL v1 (516 cuencas) a v2 (860). Las variables climáticas y topográficas de la cuenca se recalculan sobre el nuevo polígono |
+| `cr2sub_*bna*` | 9 | Nuevo criterio de asignación: cuenca que contiene al pozo, con buffer de 500 m solo si no cae en ninguna (antes el buffer se aplicaba a todos los pozos) |
+| `cr2sub_clsoilmap_*` | 0 | Sin cambios; ver sección 8 |
+
+Pozos sin cuenca CAMELS: 310 en v1.1 → 230 en v1.2. El pozo `5221007`
+(PAPUDO Y ZAPALLAR, mismas coordenadas) tenía cuenca en v1 y ya no en v2,
+porque el polígono cambió.
+
+## 7. Pipeline
+
+Corrida completa con el input nuevo (`main_pipeline.py`: 01 → 01b → 02 → 03).
+Las salidas coinciden con las secciones 1 a 5; los CSV de `versions/v1.2/` son
+copia de `cr2sub/`. La asignación a cuencas ahora se regenera con
+`input/cr2sub_basin_lookup_tables/lookup_table_script.R` (intersección
+vectorial, sin dependencias externas).
+
+## 8. CLSoilMaps entre pozos y entre versiones
+
+Scripts: [`scripts/validate_clsoilmaps_extraction.R`](scripts/validate_clsoilmaps_extraction.R)
+(re-extrae el suelo de todos los pozos con los rasters originales) y
+`compare_attributes.py`. Salidas: `clsoilmaps_*.csv` y
+`clsoilmaps_stored_vs_reextracted.png` en `comparison_v1.1_vs_v1.2/`.
+
+**v1.1 vs v1.2.** Los valores de suelo son idénticos en 1131 de los 1133
+pozos comunes. Los otros 2 son los pozos nuevos (`05120007` y `05120011`) que
+v1.1 tenía en NA y que ahora se extrajeron de los rasters. Pozos con suelo en
+NA: 66 de 1133 (fuera de la cobertura de CLSoilMaps).
+
+**Coherencia espacial.** Para cada pozo y su vecino más cercano a menos de
+5 km (884 pares), la correlación del valor de suelo es 0,77 a 0,95 (por
+ejemplo arena 0-100 cm: 0,95; arcilla 0-100 cm: 0,92), frente a ~0 para
+pares al azar. Los dos pozos nuevos quedan en el rango de sus vecinos
+(AWC 0-100 cm: 130 y 126 mm; vecinos entre 120 y 139 mm).
+
+**Verificaciones físicas.** Sin valores negativos y densidad aparente entre
+0,7 y 2,0 g/cm³ en todos los pozos. Hay 9 pozos con arcilla + arena > 100 %
+en 100-200 cm; son promedios sobre un buffer de 500 m, no mediciones, y
+conviene tenerlo presente.
+
+**Re-extracción vs valores guardados** (1066 pozos con dato en ambos):
+correlación 0,997 a 0,999; mediana de la diferencia relativa 0,06 % a 0,5 %.
+Solo 106 a 598 pozos por variable son idénticos al milésimo, así que el
+buffer no se construye exactamente igual que el original, pero la diferencia
+es pequeña (mediana de AWC 0-100 cm: 0,1 mm sobre una mediana de 136 mm).
+
+**Hallazgo importante.** Los tres pozos con mayor desvío son pozos cuyas
+coordenadas cambiaron entre v1.1 y v1.2 (`4308010`, `1700042` y `8114002`,
+sección 2). Su suelo guardado se calculó con la ubicación vieja y no se
+recalculó, porque el paso 01b solo extrae pozos que faltan en el CSV. El
+cuarto pozo que cambió de coordenadas, `4400037`, tiene valor guardado
+(AWC 0-100 cm: 94,7 mm) pero la re-extracción da NA. Además `6011022` y
+`4400017` están en NA en el valor guardado y con dato en la re-extracción
+(136,7 y 124,4 mm). Conviene hacer que el paso 01b recalcule también los
+pozos cuyas coordenadas cambian y revisar esos casos de borde de cobertura.
+
 ## Cómo reproducir
+
+Todo junto (tras `main_pipeline.py`): `review_dga_xlsx_migration/scripts/regenerate_review.sh`. Por partes:
 
 ```bash
 cd review_dga_xlsx_migration/scripts
-python3 compare_outputs.py   # requiere solo stdlib, no pandas
+python3 compare_outputs.py        # series y metadatos; solo stdlib
+Rscript ../../review_dga_xlsx_migration/scripts/validate_clsoilmaps_extraction.R   # desde la raíz del repo
+python3 compare_attributes.py     # atributos y CLSoilMaps; pandas, matplotlib
+python3 plot_series_extension.py; python3 plot_coverage_by_region.py   # figuras; geopandas
 ```
 
 Lee de `../versions/{v1.1,v1.2}/*.csv` y escribe a

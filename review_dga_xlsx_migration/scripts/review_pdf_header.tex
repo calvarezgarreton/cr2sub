@@ -1,0 +1,19 @@
+% LaTeX header for REVIEW.pdf (see scripts/regenerate_review.sh)
+\usepackage[table]{xcolor}
+\usepackage{fancyhdr,titlesec,booktabs,etoolbox,caption}
+\definecolor{cr2blue}{RGB}{31,78,121}
+\renewcommand{\familydefault}{\sfdefault}
+\titleformat{\section}{\Large\bfseries\color{cr2blue}}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\large\bfseries\color{cr2blue}}{\thesubsection}{0.5em}{}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small CR2SUB \,$\cdot$\, Revisión migración input DGA}
+\rhead{\small cr2sub\_v1.2}
+\cfoot{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\captionsetup{font=small,labelfont=bf}
+\AtBeginEnvironment{longtable}{\footnotesize\rowcolors{2}{gray!10}{white}}
+\setlength{\parskip}{0.4em}
+\setlength{\parindent}{0pt}
+\usepackage{float}
+\floatplacement{figure}{H}

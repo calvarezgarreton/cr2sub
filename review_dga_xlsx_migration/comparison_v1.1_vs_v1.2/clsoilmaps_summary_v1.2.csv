@@ -1,0 +1,11 @@
+,min,median,max,n_na
+cr2sub_clsoilmap_awc_0_100cm,70.685,136.324,294.605,66
+cr2sub_clsoilmap_awc_100_200cm,64.409,130.527,265.831,66
+cr2sub_clsoilmap_bulkd_0_100cm,0.725,1.518,1.767,66
+cr2sub_clsoilmap_bulkd_100_200cm,0.727,1.551,1.991,66
+cr2sub_clsoilmap_clay_0_100cm,4.459,21.814,47.476,66
+cr2sub_clsoilmap_clay_100_200cm,7.734,22.792,52.843,66
+cr2sub_clsoilmap_ksat_0_100cm,4.794,13.724,305.158,66
+cr2sub_clsoilmap_ksat_100_200cm,2.397,11.776,241.492,66
+cr2sub_clsoilmap_sand_0_100cm,20.926,47.246,82.809,66
+cr2sub_clsoilmap_sand_100_200cm,20.36,48.273,84.242,66
