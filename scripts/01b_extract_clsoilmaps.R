@@ -25,7 +25,9 @@ if (!file.exists(metadata_file)) {
   stop("No se encontró la metadata en .tmp; ejecuta antes 01_consolidate.R.")
 }
 
-metadata <- read.csv(metadata_file, colClasses = c(cr2sub_id = "character"))
+metadata <- read.csv(metadata_file)
+# cr2sub_id has 8 digits; restore the leading zero lost when stored as numeric
+metadata$cr2sub_id <- sprintf("%08d", as.integer(metadata$cr2sub_id))
 soil <- read.csv(soil_file, colClasses = c(cr2sub_id = "character"))
 
 new_wells <- metadata[!metadata$cr2sub_id %in% soil$cr2sub_id, ]

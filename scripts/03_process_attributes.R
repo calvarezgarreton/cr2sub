@@ -330,7 +330,7 @@ clsmap <- read.csv(
   colClasses = c(cr2sub_id = "character"),
   row.names = 1
 )
-clsmap <- clsmap[as.character(metadata_df$cr2sub_id), ]
+clsmap <- clsmap[sprintf("%08d", as.integer(metadata_df$cr2sub_id)), ]
 
 metadata_df <- cbind.data.frame(metadata_df, clsmap)
 
