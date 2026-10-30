@@ -23,7 +23,7 @@ source("scripts/functions/functions_consolidate_cr2sub.R")
 # -----------------------------------------------------------------------------
 
 tag <- "cr2sub"
-version <- "v1.3"
+version <- "v1.2"
 out_folder <- file.path(tag)
 project_tmp_dir <- file.path(".tmp")
 system_tmp_dir <- file.path(tempdir(), "cr2sub")

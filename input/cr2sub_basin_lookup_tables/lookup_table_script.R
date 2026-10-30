@@ -1,8 +1,10 @@
 rm(list = ls())
 
 # 1. Configurar directorio de trabajo
-wd <- "/Users/rmarinao/Library/CloudStorage/Dropbox/RM_fdcyt_cag"
-setwd(wd)
+# wd <- "/Users/rmarinao/Library/CloudStorage/Dropbox/RM_fdcyt_cag"
+# setwd(wd)
+tag <- "cr2sub"
+version <- "v1.2"
 
 # 2. Cargar librerías necesarias
 library(terra)
@@ -94,6 +96,8 @@ if (!dir.exists(subdir)) dir.create(subdir)
 
 write.csv(
   inner_join,
-  paste0("cr2sub_v1.3_join_table_with_", type, ".csv"),
+  # paste0("cr2sub_v1.3_join_table_with_", type, ".csv"),
+  paste0(tag, "_", version, "_join_table_with_", type, ".csv"),
   row.names = FALSE
 )
+
