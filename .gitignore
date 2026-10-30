@@ -15,3 +15,6 @@ notas
 
 # figures folder
 figures
+# local paths and editor settings
+.env
+.vscode
