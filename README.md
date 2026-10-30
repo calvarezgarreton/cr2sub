@@ -16,7 +16,19 @@ Each version lives in its own branch with the same folder structure (see [docs/v
 |---|---|
 | `main` | Common documentation, no data |
 | `cr2sub_v1.1` | **Obsolete.** Published release (Zenodo); superseded by v1.2 |
-| `cr2sub_v1.2` | **Current.** DGA transparency data update (October 2026): single DGA export as input, CAMELS-CL v2 basins |
+| `cr2sub_v1.2` | **Current.** DGA transparency data update (October 2026): single DGA export as input, CAMELS-CL v2 basins. Data requested under the Chilean Transparency Law (see [Data source](#data-source-v12)) |
+
+## What's New in v1.2
+
+- **New DGA source**: single export obtained through the Transparency Law (see [Data source](#data-source-v12)). Series now extend to August 2026 (v1.1 ended in December 2024).
+- **1,133 wells** (v1.1: 1,137). Four wells of the Taltal basin are not in the new export.
+- **CAMELS-CL v2** basins (860) replace CAMELS-CL v1 (516); basin assignment now uses the basin that contains the well.
+- **CLSoilMaps extraction** is part of the pipeline; the heavy rasters are only needed for new wells.
+- **Self-contained pipeline**: local paths go in `.env`, and the review of v1.1 vs v1.2 is in `review_dga_xlsx_migration/`.
+
+## Data source (v1.2)
+
+The v1.2 groundwater level data were requested from the DGA under the Chilean Transparency Law (Ley de Transparencia, Ley 20.285) through the [Portal de Transparencia](https://www.portaltransparencia.cl/PortalPdT/ingreso-sai-v2). Request N° AM006T0034616 was received on 2026-09-21 (static water levels in wells, January 1950 to August 2026, for 1,137 stations) and answered by the DGA on 2026-10-01. The response is the single export `input/DGA_GWL_obs_descarga/AM006T0034616_1.xlsx`. The DGA reply letter is in [docs/transparency_request_AM006T0034616_dga_reply.pdf](docs/transparency_request_AM006T0034616_dga_reply.pdf).
 
 ## Output (`cr2sub/`)
 
@@ -38,7 +50,7 @@ Each version lives in its own branch with the same folder structure (see [docs/v
 
 | Folder | Content |
 |---|---|
-| `DGA_GWL_obs_descarga/` | DGA export `AM006T0034616_1.xlsx` (raw observations and well metadata) |
+| `DGA_GWL_obs_descarga/` | DGA export `AM006T0034616_1.xlsx` (raw observations and well metadata), obtained through the Transparency Law |
 | `camels_cl_basins/` | CAMELS-CL v2 basin boundaries (`.gpkg`, 860 basins), from [CAMELS-CL](https://www.camels.cr2.cl/) |
 | `BNA_basins/` | BNA basin boundaries, from the [DGA repository](https://dga.mop.gob.cl/mapoteca-digital/) |
 | `cr2sub_basin_lookup_tables/` | Well-to-basin tables and the script that builds them |
