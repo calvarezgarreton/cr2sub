@@ -19,7 +19,7 @@ cp "$ROOT"/cr2sub/cr2sub_v1.2_*.csv "$REVIEW/versions/v1.2/"
 (cd "$ROOT" && Rscript review_dga_xlsx_migration/scripts/validate_clsoilmaps_extraction.R)
 
 # 3. Attribute / CLSoilMaps comparison and figures
-(cd "$HERE" && "$PY" compare_attributes.py && "$PY" plot_series_extension.py && "$PY" plot_coverage_by_region.py)
+(cd "$HERE" && "$PY" compare_attributes.py && "$PY" compare_plots.py && "$PY" compare_vs_dga.py && "$PY" plot_series_extension.py && "$PY" plot_coverage_by_region.py)
 
 # 4. PDF (style in review_pdf_header.tex)
 cd "$REVIEW"

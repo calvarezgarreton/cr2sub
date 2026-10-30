@@ -34,7 +34,9 @@ contra la v1.1 con [`scripts/compare_outputs.py`](scripts/compare_outputs.py)
 (reproducible, ver sección "Cómo reproducir" abajo). Los resultados de esa
 comparación quedan en `comparison_v1.1_vs_v1.2/`.
 
-## 1. Cobertura de pozos — la brecha
+# Parte I — Comparación entre versiones (v1.1 vs v1.2)
+
+## I.1 Cobertura de pozos
 
 | | Pozos v1.1 | Pozos v1.2 | En común |
 |---|---|---|---|
@@ -50,14 +52,12 @@ export único nuevo (`comparison_v1.1_vs_v1.2/wells_missing_in_new_source.csv`):
 | 02942011-4 | ESSAN AV - 48 | QS. entre Q. La Negra y Q. Pan de Azúcar | Quebrada de Taltal |
 | 02942023-8 | ESSAN AV - 48 | QS. entre Q. La Negra y Q. Pan de Azúcar | Quebrada de Taltal |
 
-Los 4 son puntos de monitoreo privados (prefijo ESSAN/PIQUE AV, minería) en
-la cuenca de Taltal, no estaciones públicas DGA — su ausencia del export del
-portal es esperable y no se considera un defecto de la migración.
+Los 4 pertenecen a la cuenca de Taltal (prefijos ESSAN y PIQUE AV).
 
 No hay pozos en el archivo nuevo que no existieran antes (0 pozos nuevos
 "de más").
 
-## 2. Comparación de metadatos (`attributes.csv`)
+## I.2 Metadatos
 
 De los 1133 pozos en común, **17 valores de metadata** (en 13 pozos)
 difieren en más de 0.01 entre el input viejo y el nuevo
@@ -74,20 +74,14 @@ difieren en más de 0.01 entre el input viejo y el nuevo
 | 8114002 | POZO COIHUECO en Internado Municipal | lon | -71.871667 | -71.838056 |
 | 1700051/057/076/099-106 (JICA, 9 pozos) | — | elevación | — | -25 a -35 m |
 
-Son correcciones/actualizaciones reales en la base de metadatos de DGA entre
-la fecha en que se bajaron los reportes viejos y la fecha del export nuevo
-(re-levantamientos de coordenadas/cota), no errores de parsing: el formato
-de coordenadas del archivo nuevo (`DDDMMSS` compacto) es uniforme en los
-1134 pozos y se validó contra ubicaciones conocidas antes de escribir el
-parser. Quedan documentadas para que quien revise sepa que no son
-sorpresa de la migración, pero no se "corrigieron" en ningún sentido — se
-usa el valor que trae cada fuente.
+Los valores difieren entre las dos fuentes y se usa el que trae cada una. El
+formato de coordenadas del archivo nuevo (`DDDMMSS` compacto) es uniforme en
+los 1134 pozos.
 
-Las métricas agregadas (`cr2sub_mean_gwl`, `cr2sub_sd_gwl`) cambian
-levemente en ~110-120 pozos — esperado, porque ahora hay más meses de datos
-por pozo (huecos rellenados + serie extendida).
+Las métricas agregadas `cr2sub_mean_gwl` y `cr2sub_sd_gwl` cambian en 142 y
+124 pozos (I.6).
 
-## 3. Series que evidencian la extensión temporal
+## I.3 Series: extensión temporal
 
 **Rango de fechas:**
 
@@ -113,7 +107,7 @@ ahora tienen valor está en `comparison_v1.1_vs_v1.2/gwl_mon_gap_filled.csv` (42
 `gwl_mon.csv`, 840 en `gwl_mon_clean.csv`, repartidas en huecos intermedios
 de otros pozos además de esta cola).
 
-## 4. Cobertura mensual por región, 2020–2026
+## I.4 Cobertura mensual por región, 2020–2026
 
 Número de pozos con dato en cada mes, por región (norte a sur), para v1.1
 y v1.2 con la misma escala de color. La región de cada pozo se asigna por
@@ -135,11 +129,11 @@ versiones: v1.2 en azul grueso y v1.1 en naranja fino. Generado con
   Por región: Valparaíso 362, Tarapacá 127, Coquimbo 63, O'Higgins 43,
   Arica y Parinacota 3, Maule 2.
 - Los otros 21 pozos-mes que v1.2 no tiene en el periodo corresponden a
-  los 4 pozos privados de Taltal que no están en el export nuevo (sección 1).
+  los 4 pozos privados de Taltal que no están en el export nuevo (I.1).
 - La cobertura cae desde ~2020 en ambas versiones y las regiones al sur de
   O'Higgins casi no tienen datos desde 2021–2023.
 
-## 5. Consistencia de valores (no solo cobertura)
+## I.5 Consistencia de valores de las series
 
 Comparando las **921.129 celdas** (pozo × fecha) presentes en ambas fuentes
 en `gwl_mon.csv`:
@@ -153,83 +147,174 @@ en `gwl_mon.csv`:
 
 El único dato "perdido" es el pozo `1700028` en 2024-04
 (`comparison_v1.1_vs_v1.2/gwl_mon_lost.csv`). En `gwl_mon_clean.csv` (post
-remoción de outliers) la cifra sube a 16 perdidos / 840 rellenados — es
-esperable, porque el filtro de outliers recalcula con más contexto
-temporal y puede marcar como outlier algo que antes, con una serie más
-corta, no se evaluaba igual.
+remoción de outliers) las cifras son 16 perdidos y 840 rellenados.
 
-**Conclusión:** cero conflictos de valor en ~920 mil puntos comparados. El
-archivo único es, en la práctica, un superset de las 3 carpetas viejas
-(mismos valores donde coinciden, más puntos donde antes había huecos),
-salvo los 4 pozos privados fuera del export del portal.
+**Resultado:** cero conflictos de valor en unos 920 mil puntos comparados;
+el export único tiene los mismos valores donde coincide con las descargas
+viejas y más puntos donde había huecos, salvo los 4 pozos de Taltal que no
+están en él.
 
-## 6. Atributos columna a columna (1133 pozos en común)
+## I.6 Atributos columna a columna
 
 Generado con [`scripts/compare_attributes.py`](scripts/compare_attributes.py)
 (`comparison_v1.1_vs_v1.2/attribute_column_diffs.csv`). De las 45 columnas de
 `attributes.csv`, solo `cr2sub_id` es idéntica; los cambios se agrupan así:
 
-| Grupo | Pozos que cambian | Causa |
+| Grupo | Pozos que cambian | Observación |
 |---|---|---|
-| `dga_well_basin` / `subbasin` / `name` | 1133 / 712 / 45 | La DGA cambió el formato del texto (`RIO COPIAPO` → `R.  Copiapo`; `EL TRANSITO` → `POZO EL TRANSITO`). No es un cambio de ubicación |
-| Coordenadas y cota `dga_*` / `cr2sub_*` | 14 a 33 según columna | Re-levantamientos en la base DGA (sección 2). Arrastran `cr2sub_elev` y `cr2sub_slp` (14 pozos) |
-| `cr2sub_mean/sd/cv_gwl` (raw y clean) | 61 a 142 | Más meses de datos por pozo (secciones 3 y 5) |
-| `cr2sub_*camels*` | 273 cambian de cuenca, 77 pasan de NA a tener cuenca, 1 pasa a NA | Cambio de CAMELS-CL v1 (516 cuencas) a v2 (860). Las variables climáticas y topográficas de la cuenca se recalculan sobre el nuevo polígono |
-| `cr2sub_*bna*` | 9 | Nuevo criterio de asignación: cuenca que contiene al pozo, con buffer de 500 m solo si no cae en ninguna (antes el buffer se aplicaba a todos los pozos) |
-| `cr2sub_clsoilmap_*` | 0 | Sin cambios; ver sección 8 |
+| `dga_well_basin` / `subbasin` / `name` | 1133 / 712 / 45 | El texto cambia de formato (`RIO COPIAPO` → `R.  Copiapo`; `EL TRANSITO` → `POZO EL TRANSITO`) |
+| Coordenadas y cota `dga_*` / `cr2sub_*` | 14 a 33 según columna | Ver I.2; `cr2sub_elev` y `cr2sub_slp` cambian en 14 pozos |
+| `cr2sub_mean/sd/cv_gwl` (raw y clean) | 61 a 142 | Ver I.3 e I.5 |
+| `cr2sub_*camels*` | 273 cambian de cuenca, 77 pasan de NA a tener cuenca, 1 pasa a NA | CAMELS-CL v1 (516 cuencas) → v2 (860 cuencas) |
+| `cr2sub_*bna*` | 9 | Nuevo criterio: cuenca que contiene al pozo, con buffer de 500 m solo si no cae en ninguna (antes el buffer se aplicaba a todos los pozos) |
+| `cr2sub_clsoilmap_*` | 0 | Ver I.8 |
 
 Pozos sin cuenca CAMELS: 310 en v1.1 → 230 en v1.2. El pozo `5221007`
-(PAPUDO Y ZAPALLAR, mismas coordenadas) tenía cuenca en v1 y ya no en v2,
-porque el polígono cambió.
+(PAPUDO Y ZAPALLAR, mismas coordenadas) tenía cuenca CAMELS en v1 y no en v2.
 
-## 7. Pipeline
+## I.7 Figuras comparativas de atributos
 
-Corrida completa con el input nuevo (`main_pipeline.py`: 01 → 01b → 02 → 03).
-Las salidas coinciden con las secciones 1 a 5; los CSV de `versions/v1.2/` son
-copia de `cr2sub/`. La asignación a cuencas ahora se regenera con
-`input/cr2sub_basin_lookup_tables/lookup_table_script.R` (intersección
-vectorial, sin dependencias externas).
+Figuras generadas con [`scripts/compare_plots.py`](scripts/compare_plots.py) (`comparison_v1.1_vs_v1.2/fig_*.png`).
 
-## 8. CLSoilMaps entre pozos y entre versiones
+**A. Estadísticos del nivel.** El nivel medio cambia en 142 pozos (mediana
+0,05 m, máximo 4,2 m).
 
-Scripts: [`scripts/validate_clsoilmaps_extraction.R`](scripts/validate_clsoilmaps_extraction.R)
-(re-extrae el suelo de todos los pozos con los rasters originales) y
-`compare_attributes.py`. Salidas: `clsoilmaps_*.csv` y
-`clsoilmaps_stored_vs_reextracted.png` en `comparison_v1.1_vs_v1.2/`.
+![A. Estadísticos del nivel freático, v1.1 vs v1.2](comparison_v1.1_vs_v1.2/fig_a_gwl_stats.png)
+
+**B. Series y filtro de outliers.** 162 pozos ganan meses (mediana 2,
+máximo 167) y 1 pierde. El filtro elimina el 18,5 % de los datos en v1.1 y
+el 18,2 % en v1.2. 598 de los 1133 pozos tienen menos de 100 meses con dato
+y quedan sin datos en `gwl_mon_clean.csv` (`min_obs = 100`); en los 535
+restantes se elimina el 3,35 %.
+
+![B. Series: cantidad de datos y outliers](comparison_v1.1_vs_v1.2/fig_b_series.png)
+
+**C. Ubicación y cota.** Diferencia entre la cota reportada por la DGA y la
+del DEM en la coordenada del pozo, para los 4 pozos que cambian de
+ubicación (v1.1 → v1.2): `4308010` 1445 m → 9 m, `4400037` 211 m → 2 m,
+`1700042` 145 m → 4 m, `8114002` 3 m → 1 m. 345 pozos reportan cota 0 en
+ambas versiones. Hay 227 pozos con diferencia mayor a 200 m en v1.2 (15 si
+se excluyen los de cota 0); la mediana de |diferencia| es 9,8 m.
+
+![C. Ubicación y cota](comparison_v1.1_vs_v1.2/fig_c_location.png)
+
+**D. Cuencas CAMELS.** De los 553 pozos que mantienen el mismo `gauge_id`,
+cambian elevación (mediana 4,9 m, p95 58 m) y precipitación (mediana
+0,35 mm, p95 29 mm). En los 273 pozos que cambian de cuenca, la mediana de
+la diferencia es 254 m de elevación y 63 mm de precipitación.
+
+![D. Atributos de la cuenca CAMELS](comparison_v1.1_vs_v1.2/fig_d_camels.png)
+
+**E. Cuencas BNA.** 9 pozos BNA cambian de cuenca (paneles superiores).
+
+![E. BNA y consistencia de los atributos climáticos](comparison_v1.1_vs_v1.2/fig_e_bna_consistency.png)
+
+## I.8 CLSoilMaps entre versiones
 
 **v1.1 vs v1.2.** Los valores de suelo son idénticos en 1131 de los 1133
 pozos comunes. Los otros 2 son los pozos nuevos (`05120007` y `05120011`) que
 v1.1 tenía en NA y que ahora se extrajeron de los rasters. Pozos con suelo en
 NA: 66 de 1133 (fuera de la cobertura de CLSoilMaps).
 
+**Pozos con coordenadas cambiadas.** Los tres pozos con mayor diferencia
+entre el valor guardado y la re-extracción son `4308010`, `1700042` y
+`8114002`, que cambiaron de coordenadas entre v1.1 y v1.2 (I.2); su
+valor guardado es idéntico al de v1.1. El cuarto pozo con coordenadas
+cambiadas, `4400037`, tiene valor guardado (AWC 0-100 cm: 94,7 mm) y la
+re-extracción da NA. `6011022` y `4400017` están en NA en el valor guardado
+y tienen dato en la re-extracción (136,7 y 124,4 mm).
+
+# Parte II — Comparación con la DGA (solo v1.2)
+
+Se compara `cr2sub_v1.2_*` con el export de la DGA del que sale
+(`AM006T0034616_1.xlsx`), recalculando en Python, de forma independiente del
+pipeline en R, las series mensuales y las coordenadas. No interviene v1.1.
+Script: [`scripts/compare_vs_dga.py`](scripts/compare_vs_dga.py); salidas en
+`comparison_v1.1_vs_v1.2/vs_dga_*.csv` y `fig_g_vs_dga.png`.
+
+## II.1 Pozos y registros
+
+El export tiene 147.180 filas; 358 no tienen código de estación y quedan
+fuera. De las 146.822 restantes, 7.951 tienen valor menor o igual a 0 y no
+entran a las series. El export tiene 1.133 pozos y `attributes` de v1.2
+tiene los mismos 1.133.
+
+## II.2 Series mensuales
+
+Se recalcula la serie mensual con las reglas del paso 01: promedio de las
+mediciones repetidas de un mismo pozo y fecha, descarte de valores menores o iguales a 0,
+promedio mensual y signo invertido. En las 137.975 celdas pozo-mes con dato
+en ambas fuentes hay 0 diferencias (máximo 2,8e-14 m) y ninguna celda tiene
+dato solo en una de las dos.
+
+## II.3 Coordenadas
+
+- Las coordenadas del export (`DDDMMSS`), convertidas de forma
+  independiente, coinciden con `dga_well_lat` y `dga_well_lon` (diferencia
+  máxima 4,4e-7°).
+- `cr2sub_lat` y `cr2sub_lon` son iguales a las de la DGA en los 1.133 pozos.
+- UTM y lat/lon reportados por la DGA: mediana de la distancia 0,015 km;
+  1 pozo supera 1 km (`4320007`, 9,0 km). Para 39 pozos el huso 18 ajusta
+  mejor que el 19 (la DGA no informa el huso).
+
+## II.4 Cota
+
+345 pozos tienen cota 0 en el export. En los otros 788 la mediana de
+|cota DEM − cota DGA| es 6,2 m y 15 pozos superan los 200 m
+(`vs_dga_elev_gt200m.csv`).
+
+## II.5 Cuenca BNA
+
+El código BNA del polígono que contiene al pozo coincide con los primeros 3
+dígitos del código DGA en 1.105 de 1.133 pozos; en 28 difiere
+(`vs_dga_bna_prefix_mismatch.csv`; 10 de ellos con prefijo 42 y polígono 43).
+
+![G. CR2SUB v1.2 vs la fuente DGA](comparison_v1.1_vs_v1.2/fig_g_vs_dga.png)
+
+# Parte III — Otras verificaciones de v1.2
+
+Ni entre versiones ni contra la DGA.
+
+## III.1 CLSoilMaps
+
+Scripts: [`scripts/validate_clsoilmaps_extraction.R`](scripts/validate_clsoilmaps_extraction.R)
+(re-extrae el suelo de todos los pozos con los rasters originales) y
+`compare_attributes.py`. Salidas: `clsoilmaps_*.csv` y
+`clsoilmaps_stored_vs_reextracted.png` en `comparison_v1.1_vs_v1.2/`.
+
 **Coherencia espacial.** Para cada pozo y su vecino más cercano a menos de
 5 km (884 pares), la correlación del valor de suelo es 0,77 a 0,95 (por
 ejemplo arena 0-100 cm: 0,95; arcilla 0-100 cm: 0,92), frente a ~0 para
-pares al azar. Los dos pozos nuevos quedan en el rango de sus vecinos
-(AWC 0-100 cm: 130 y 126 mm; vecinos entre 120 y 139 mm).
+pares al azar. Los dos pozos nuevos tienen AWC 0-100 cm de 130 y 126 mm;
+sus tres vecinos más cercanos van de 120 a 139 mm.
 
 **Verificaciones físicas.** Sin valores negativos y densidad aparente entre
 0,7 y 2,0 g/cm³ en todos los pozos. Hay 9 pozos con arcilla + arena > 100 %
-en 100-200 cm; son promedios sobre un buffer de 500 m, no mediciones, y
-conviene tenerlo presente.
+en 100-200 cm.
 
 **Re-extracción vs valores guardados** (1066 pozos con dato en ambos):
 correlación 0,997 a 0,999; mediana de la diferencia relativa 0,06 % a 0,5 %.
-Solo 106 a 598 pozos por variable son idénticos al milésimo, así que el
-buffer no se construye exactamente igual que el original, pero la diferencia
-es pequeña (mediana de AWC 0-100 cm: 0,1 mm sobre una mediana de 136 mm).
+Entre 106 y 598 pozos por variable son idénticos al milésimo; la mediana de
+la diferencia en AWC 0-100 cm es 0,1 mm (mediana de la variable: 136 mm).
 
-**Hallazgo importante.** Los tres pozos con mayor desvío son pozos cuyas
-coordenadas cambiaron entre v1.1 y v1.2 (`4308010`, `1700042` y `8114002`,
-sección 2). Su suelo guardado se calculó con la ubicación vieja y no se
-recalculó, porque el paso 01b solo extrae pozos que faltan en el CSV. El
-cuarto pozo que cambió de coordenadas, `4400037`, tiene valor guardado
-(AWC 0-100 cm: 94,7 mm) pero la re-extracción da NA. Además `6011022` y
-`4400017` están en NA en el valor guardado y con dato en la re-extracción
-(136,7 y 124,4 mm). Conviene hacer que el paso 01b recalcule también los
-pozos cuyas coordenadas cambian y revisar esos casos de borde de cobertura.
+**F. CLSoilMaps.** Mapa de AWC, arcilla y ksat; 66 pozos sin dato (cruces
+rojas). La comparación numérica está en I.8 y III.1.
 
-## Cómo reproducir
+![F. CLSoilMaps en v1.2](comparison_v1.1_vs_v1.2/fig_f_soil_map.png)
+
+## III.2 Consistencia de los atributos climáticos
+
+La diferencia máxima entre la aridez y ETP/P es 0,005 (CAMELS) y 0,009 (BNA). La fracción nival está dentro de [0, 1] en todos los pozos. La precipitación disminuye de sur a norte (panel inferior de la figura E, en I.7).
+
+## III.3 Pipeline
+
+Corrida completa con el input nuevo (`main_pipeline.py`: 01 → 01b → 02 → 03).
+Las salidas coinciden con las secciones I.1 a I.5; los CSV de `versions/v1.2/` son
+copia de `cr2sub/`. La asignación a cuencas ahora se regenera con
+`input/cr2sub_basin_lookup_tables/lookup_table_script.R` (intersección
+vectorial, sin dependencias externas).
+
+# Cómo reproducir
 
 Todo junto (tras `main_pipeline.py`): `review_dga_xlsx_migration/scripts/regenerate_review.sh`. Por partes:
 
@@ -238,6 +323,8 @@ cd review_dga_xlsx_migration/scripts
 python3 compare_outputs.py        # series y metadatos; solo stdlib
 Rscript ../../review_dga_xlsx_migration/scripts/validate_clsoilmaps_extraction.R   # desde la raíz del repo
 python3 compare_attributes.py     # atributos y CLSoilMaps; pandas, matplotlib
+python3 compare_plots.py          # figuras A-F; pandas, matplotlib
+python3 compare_vs_dga.py         # Parte II, contra el export DGA; openpyxl, pyproj
 python3 plot_series_extension.py; python3 plot_coverage_by_region.py   # figuras; geopandas
 ```
 
