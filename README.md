@@ -32,13 +32,13 @@ Data in `input/` may differ between branches; each branch documents what it need
 
 ## cr2sub
 
-**cr2sub_v1.3_gwl_mon.csv**<br>
+**cr2sub_v1.2_gwl_mon.csv**<br>
  Consolidated monthly time series of raw groundwater level (GWL) observations. Raw GWL observations were downloaded as _.xls_ spreadsheets from the [DGA website](https://snia.mop.gob.cl/BNAConsultas/reportes), stored in _input_ and processed through the codes provided in _scripts_. When more than one record was available for a given month, the values were averaged to obtain a single monthly estimate.
 
-**cr2sub_v1.3_gwl_mon_clean.csv**<br>
+**cr2sub_v1.2_gwl_mon_clean.csv**<br>
  Monthly time series after applying an outlier-removal procedure. The code for outlier detection and removal is available in _scripts_.
 
-**cr2sub_v1.3_attributes.csv**<br>
+**cr2sub_v1.2_attributes.csv**<br>
 Metadata of the observation wells extracted from the _.xls_ files downloaded from DGA website (_input_), and climatic, topographical and soil attributes computed from on ancillary information (available in _input_):
 <small>
 - cr2sub_id: unique observation well identifier in cr2sub database. The cr2sub_id is the same as the DGA well code, without the identification last digit.<br>
@@ -57,11 +57,11 @@ Metadata of the observation wells extracted from the _.xls_ files downloaded fro
 - cr2sub_utm_east_h19: longitude of the well (_m, zone 19S_). The original DGA coordinate was corrected in some cases.<br>
 - cr2sub_elev: elevation of the well location (cr2sub_lat, cr2sub_lon) in _m a.s.l._, computed from FABDEM (Forest And Buildings removed copernicus Digital Elevation Model), available from [University of Bristol repository](https://data.bris.ac.uk/data/dataset/s5hqmjcdj8yo2ibzi9b4ew3sn), resampled at 300-m.<br>	
 - cr2sub_slp: slope of the well location (cr2sub_lat, cr2sub_lon) in _degree_, computed from FABDEM resampled at 300-m.<br>	
-- cr2sub_mean_gwl: mean depth of GWL (_m_), computed for all available records in _cr2sub_v1.3_gwl_mon.csv_.<br>
-- cr2sub_sd_gwl: standard deviation of GWL (_m_), computed for all available records in _cr2sub_v1.3_gwl_mon.csv_.<br>
+- cr2sub_mean_gwl: mean depth of GWL (_m_), computed for all available records in _cr2sub_v1.2_gwl_mon.csv_.<br>
+- cr2sub_sd_gwl: standard deviation of GWL (_m_), computed for all available records in _cr2sub_v1.2_gwl_mon.csv_.<br>
 - cr2sub_cv_gwl: coefficient of variation of GWL (_-_), computed as cr2sub_sd_gwl/abs(cr2sub_mean_gwl).<br>
-- cr2sub_mean_gwl_clean: mean depth of GWL without outliers (_m_), computed for all available data in _cr2sub_v1.3_gwl_mon_clean.csv_.<br>
-- cr2sub_sd_gwl_clean: standard deviation of GWL without outliers (_m_), computed for all available data in _cr2sub_v1.3_gwl_mon_clean.csv_.<br>	
+- cr2sub_mean_gwl_clean: mean depth of GWL without outliers (_m_), computed for all available data in _cr2sub_v1.2_gwl_mon_clean.csv_.<br>
+- cr2sub_sd_gwl_clean: standard deviation of GWL without outliers (_m_), computed for all available data in _cr2sub_v1.2_gwl_mon_clean.csv_.<br>	
 - cr2sub_cv_gwl_clean: coefficient of variation of GWL without outliers (_-_), computed as cr2sub_sd_gwl_clean/abs(cr2sub_mean_gwl_clean).<br>	
 - cr2sub_in_basin_camels: gauge_id from the smallest CAMELS-CL basin where the well is located. The basin was identified by intersecting the well location (cr2sub_lat, cr2sub_lon) with CAMELS-CL v2021 polygons and stored as a lookup table in _input_.<br>  
 - cr2sub_camels_elev: mean elevation (_m a.s.l._) of the CAMELS-CL basin where the well is located, computed based on FABDEM resampled at 300-m.<br>  
@@ -109,8 +109,8 @@ Metadata of the observation wells extracted from the _.xls_ files downloaded fro
 **other_data**:
 <small>
 - Chile_boundary_simplified_from_SIIT: shapefile with national boundaries downloaded from https://www.bcn.cl/siit/mapas_vectoriales. 
-- cr2sub_v1.3_join_table_with_bna_basins: lookup table with the codes of the BNA basin(s) in which the CR2SUB observation wells are located.<br>  
-- cr2sub_v1.3_join_table_with_camels_cl_v2021_basins: lookup table with the codes of the CAMELS-CL v2021 basin(s) in which the CR2SUB observation wells are located.<br>  
+- cr2sub_v1.2_join_table_with_bna_basins: lookup table with the codes of the BNA basin(s) in which the CR2SUB observation wells are located.<br>  
+- cr2sub_v1.2_join_table_with_camels_cl_v2021_basins: lookup table with the codes of the CAMELS-CL v2021 basin(s) in which the CR2SUB observation wells are located.<br>  
 </small>
 
 ## scripts

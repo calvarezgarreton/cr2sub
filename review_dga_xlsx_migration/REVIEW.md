@@ -2,16 +2,16 @@
 
 ## Versiones comparadas
 
-| | v1.1 (referencia) | v1.3 (esta rama) |
+| | v1.1 (referencia) | v1.2 (esta rama) |
 |---|---|---|
-| Rama | `cr2sub_v1.1` | `cr2sub_v1.3` |
+| Rama | `cr2sub_v1.1` | `cr2sub_v1.2` |
 | Input DGA | 844 reportes `dga_xls_*` por pozo | export único `AM006T0034616_1.xlsx` |
-| Carpeta de outputs | `versions/v1.1/` | `versions/v1.3/` |
+| Carpeta de outputs | `versions/v1.1/` | `versions/v1.2/` |
 
 Los CSV de cada carpeta llevan la versión en el nombre
-(`cr2sub_v1.1_*` y `cr2sub_v1.3_*`), según la variable `version` de los
+(`cr2sub_v1.1_*` y `cr2sub_v1.2_*`), según la variable `version` de los
 scripts de cada rama. Los resultados de
-la comparación (v1.1 → v1.3) están en `comparison_v1.1_vs_v1.3/`.
+la comparación (v1.1 → v1.2) están en `comparison_v1.1_vs_v1.2/`.
 
 **Objetivo:** reemplazar `input/DGA_GWL_obs_descarga/dga_xls_*` (844 reportes
 individuales por pozo, descargados manualmente del portal DGA en 3 tandas)
@@ -32,16 +32,16 @@ pipeline completo (`01_consolidate.R` → `02_remove_outliers.ipynb` →
 `03_process_attributes.R`) con el input nuevo, y se comparó celda por celda
 contra la v1.1 con [`scripts/compare_outputs.py`](scripts/compare_outputs.py)
 (reproducible, ver sección "Cómo reproducir" abajo). Los resultados de esa
-comparación quedan en `comparison_v1.1_vs_v1.3/`.
+comparación quedan en `comparison_v1.1_vs_v1.2/`.
 
 ## 1. Cobertura de pozos — la brecha
 
-| | Pozos v1.1 | Pozos v1.3 | En común |
+| | Pozos v1.1 | Pozos v1.2 | En común |
 |---|---|---|---|
 | `gwl_mon.csv` / `gwl_mon_clean.csv` / `attributes.csv` | 1137 | 1133 | 1133 |
 
 La brecha son **4 pozos** que existen en las descargas viejas pero no en el
-export único nuevo (`comparison_v1.1_vs_v1.3/wells_missing_in_new_source.csv`):
+export único nuevo (`comparison_v1.1_vs_v1.2/wells_missing_in_new_source.csv`):
 
 | Código DGA | Nombre | Cuenca | Subcuenca |
 |---|---|---|---|
@@ -61,9 +61,9 @@ No hay pozos en el archivo nuevo que no existieran antes (0 pozos nuevos
 
 De los 1133 pozos en común, **17 valores de metadata** (en 13 pozos)
 difieren en más de 0.01 entre el input viejo y el nuevo
-(`comparison_v1.1_vs_v1.3/metadata_diffs.csv`):
+(`comparison_v1.1_vs_v1.2/metadata_diffs.csv`):
 
-| cr2sub_id | Nombre | Campo | v1.1 | v1.3 |
+| cr2sub_id | Nombre | Campo | v1.1 | v1.2 |
 |---|---|---|---|---|
 | 1700042 | SALAR BELLAVISTA | lat | -21.305833 | -20.734444 |
 | 1700042 | SALAR BELLAVISTA | lon | -69.520278 | -69.618056 |
@@ -91,16 +91,16 @@ por pozo (huecos rellenados + serie extendida).
 
 **Rango de fechas:**
 
-| Archivo | v1.1 | v1.3 |
+| Archivo | v1.1 | v1.2 |
 |---|---|---|
 | `gwl_mon.csv` | 1957-04 → 2024-12 (813 meses) | 1957-04 → 2026-08 (833 meses) |
 | `gwl_mon_clean.csv` | igual | igual |
 
 Ejemplo concreto — pozo `5423019` (el de mayor cobertura reciente), serie
-mensual completa (`cr2sub_v1.3_gwl_mon.csv`), generada con
+mensual completa (`cr2sub_v1.2_gwl_mon.csv`), generada con
 [`scripts/plot_series_extension.py`](scripts/plot_series_extension.py):
 
-![Serie de tiempo pozo 5423019: registro existente en azul, puntos agregados por la actualización en naranja](comparison_v1.1_vs_v1.3/series_extension_5423019.png)
+![Serie de tiempo pozo 5423019: registro existente en azul, puntos agregados por la actualización en naranja](comparison_v1.1_vs_v1.2/series_extension_5423019.png)
 
 En azul, el registro que ya existía con el input viejo: 344 meses entre
 1974-04 y 2024-12 (los cortes de la línea son huecos reales de medición, no
@@ -109,32 +109,32 @@ actualización, de 2025-01 a 2026-08, enganchados directo a la cola del
 registro existente — no hay reescritura del histórico, solo extensión hacia
 adelante. Todos los puntos del tramo en común entre ambas fuentes (hasta
 2024-12) son idénticos; el detalle completo de celdas que antes eran `NA` y
-ahora tienen valor está en `comparison_v1.1_vs_v1.3/gwl_mon_gap_filled.csv` (420 en
+ahora tienen valor está en `comparison_v1.1_vs_v1.2/gwl_mon_gap_filled.csv` (420 en
 `gwl_mon.csv`, 840 en `gwl_mon_clean.csv`, repartidas en huecos intermedios
 de otros pozos además de esta cola).
 
 ## 4. Cobertura mensual por región, 2020–2026
 
 Número de pozos con dato en cada mes, por región (norte a sur), para v1.1
-y v1.3 con la misma escala de color. La región de cada pozo se asigna por
+y v1.2 con la misma escala de color. La región de cada pozo se asigna por
 ubicación (cruce espacial con los límites regionales; el polígono más
 cercano si el punto cae fuera), no por el código DGA, cuyo prefijo es la
 macrocuenca BNA y no la región. El panel superior (total mensual) superpone ambas
-versiones: v1.3 en azul grueso y v1.1 en naranja fino. Generado con
+versiones: v1.2 en azul grueso y v1.1 en naranja fino. Generado con
 [`scripts/plot_coverage_by_region.py`](scripts/plot_coverage_by_region.py).
 
-![Cobertura mensual de pozos por región, v1.1 vs v1.3, 2020-2026](comparison_v1.1_vs_v1.3/cobertura_mensual_por_region_v1.1_vs_v1.3_2020-2026.png)
+![Cobertura mensual de pozos por región, v1.1 vs v1.2, 2020-2026](comparison_v1.1_vs_v1.2/cobertura_mensual_por_region_v1.1_vs_v1.2_2020-2026.png)
 
 - Hasta dic-2024 las dos versiones son prácticamente idénticas; la línea
   naranja corre dentro de la azul.
-- Desde 2025 solo v1.3 tiene datos (hasta ago-2026), concentrados en
+- Desde 2025 solo v1.2 tiene datos (hasta ago-2026), concentrados en
   Valparaíso, Tarapacá, Coquimbo y O'Higgins. Las demás regiones no
   aportan meses nuevos.
-- En pozos presentes en ambas versiones, v1.3 suma 600 pozos-mes en
+- En pozos presentes en ambas versiones, v1.2 suma 600 pozos-mes en
   2020–2026 (557 desde 2025 y 43 de huecos rellenados antes) y pierde 1.
   Por región: Valparaíso 362, Tarapacá 127, Coquimbo 63, O'Higgins 43,
   Arica y Parinacota 3, Maule 2.
-- Los otros 21 pozos-mes que v1.3 no tiene en el periodo corresponden a
+- Los otros 21 pozos-mes que v1.2 no tiene en el periodo corresponden a
   los 4 pozos privados de Taltal que no están en el export nuevo (sección 1).
 - La cobertura cae desde ~2020 en ambas versiones y las regiones al sur de
   O'Higgins casi no tienen datos desde 2021–2023.
@@ -144,7 +144,7 @@ versiones: v1.3 en azul grueso y v1.1 en naranja fino. Generado con
 Comparando las **921.129 celdas** (pozo × fecha) presentes en ambas fuentes
 en `gwl_mon.csv`:
 
-| v1.1 → v1.3 | Cantidad |
+| v1.1 → v1.2 | Cantidad |
 |---|---|
 | Valores idénticos o ambos `NA` | 920.708 |
 | `NA` antes → con valor ahora (hueco rellenado) | 420 |
@@ -152,7 +152,7 @@ en `gwl_mon.csv`:
 | **Valores contradictorios** (mismo pozo/fecha, valor distinto) | **0** |
 
 El único dato "perdido" es el pozo `1700028` en 2024-04
-(`comparison_v1.1_vs_v1.3/gwl_mon_lost.csv`). En `gwl_mon_clean.csv` (post
+(`comparison_v1.1_vs_v1.2/gwl_mon_lost.csv`). En `gwl_mon_clean.csv` (post
 remoción de outliers) la cifra sube a 16 perdidos / 840 rellenados — es
 esperable, porque el filtro de outliers recalcula con más contexto
 temporal y puede marcar como outlier algo que antes, con una serie más
@@ -170,7 +170,7 @@ cd review_dga_xlsx_migration/scripts
 python3 compare_outputs.py   # requiere solo stdlib, no pandas
 ```
 
-Lee de `../versions/{v1.1,v1.3}/*.csv` y escribe a
-`../comparison_v1.1_vs_v1.3/`. Para regenerar `versions/v1.3/` desde cero, correr el
+Lee de `../versions/{v1.1,v1.2}/*.csv` y escribe a
+`../comparison_v1.1_vs_v1.2/`. Para regenerar `versions/v1.2/` desde cero, correr el
 pipeline (`scripts/main_pipeline.py`, requiere pandas para el paso 02)
 y copiar los 3 CSV de `cr2sub/` ahí.
