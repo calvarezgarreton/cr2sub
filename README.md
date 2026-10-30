@@ -6,7 +6,7 @@ CR2SUB compiles groundwater level (GWL) observations from wells of the Chilean W
 
 **License**: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 
-**Citation** (v1.1): Alvarez-Garreton, C., Marinao, R., Boisier, J. P., & Dinamarca, D. (2025). CR2SUB: monthly groundwater level database for Chile (v1.1) [Data set]. Zenodo. https://doi.org/10.5281/zenodo.17591525
+**Citation**: TBD.
 
 ## Versions
 
