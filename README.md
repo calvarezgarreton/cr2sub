@@ -94,7 +94,7 @@ Metadata of the observation wells extracted from the _.xls_ files downloaded fro
 
 **camels_cl_basins**: shapefile with CAMELS-CL v2021 basins boundaries downloaded from [CAMELS-CL platform](https://www.camels.cr2.cl/).<br>  
 
-**CLSoilMaps**: soil data computed from [CLSoilMaps database](https://www.nature.com/articles/s41597-023-02536-x). 
+**CLSoilMaps**: soil data computed from [CLSoilMaps database](https://www.nature.com/articles/s41597-023-02536-x). The file _cr2sub_CLSoilMaps_data.csv_ holds the soil attributes already extracted for each well (500-m buffer). Only wells that are not in this file need the original CLSoilMaps rasters (~16.5 GB, not tracked in git): copy _.env.example_ to _.env_, set `CR2SUB_HEAVY_DATA` to a local folder, and run `Rscript scripts/00_download_clsoilmaps.R` (source: https://zenodo.org/records/7464210). The pipeline (_scripts/01b_extract_clsoilmaps.R_) then extracts the new wells and appends them to the file.
 
 **cr2met**: precipitation, potential evapotranspiration and snowfall data v2.5 downloaded from https://ftp.cr2.cl/browse/cr2met/v2.5 and processed into monthly values.
 

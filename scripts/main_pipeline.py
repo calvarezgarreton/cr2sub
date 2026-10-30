@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the CR2SUB processing pipeline (01 → 02 → 03)."""
+"""Run the CR2SUB processing pipeline (01 → 01b → 02 → 03)."""
 import json
 import os
 import subprocess
@@ -66,6 +66,7 @@ def main() -> None:
     project_root = scripts_dir.parent
 
     run_r_script(project_root / "scripts/01_consolidate.R", project_root)
+    run_r_script(project_root / "scripts/01b_extract_clsoilmaps.R", project_root)
     execute_notebook(scripts_dir / "02_remove_outliers.ipynb", scripts_dir)
     run_r_script(project_root / "scripts/03_process_attributes.R", project_root)
 

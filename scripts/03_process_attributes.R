@@ -325,24 +325,12 @@ metadata_df$cr2sub_bna_slp <- round(bna_slope_vals[bna_ids], 2)
 # Section: Soil Attributes – CLSoilMaps
 # -----------------------------------------------------------------------------
 
-clsmap <- read.csv(clsoil_file, row.names = 1)
-clsmap <- clsmap[as.character(metadata_df$cr2sub_id), ]
-
-soil_cols <- c(
-  "cr2sub_clsoilmap_awc_0_100cm" = "AWC_0_100",
-  "cr2sub_clsoilmap_awc_100_200cm" = "AWC_100_200",
-  "cr2sub_clsoilmap_bulkd_0_100cm" = "Bulkd_0_100",
-  "cr2sub_clsoilmap_bulkd_100_200cm" = "Bulkd_100_200",
-  "cr2sub_clsoilmap_clay_0_100cm" = "Clay_0_100",
-  "cr2sub_clsoilmap_clay_100_200cm" = "Clay_100_200",
-  "cr2sub_clsoilmap_ksat_0_100cm" = "ksat_0_100",
-  "cr2sub_clsoilmap_ksat_100_200cm" = "ksat_100_200",
-  "cr2sub_clsoilmap_sand_0_100cm" = "Sand_0_100",
-  "cr2sub_clsoilmap_sand_100_200cm" = "Sand_100_200"
+clsmap <- read.csv(
+  clsoil_file,
+  colClasses = c(cr2sub_id = "character"),
+  row.names = 1
 )
-
-clsmap <- clsmap[, soil_cols]
-colnames(clsmap) <- names(soil_cols)
+clsmap <- clsmap[as.character(metadata_df$cr2sub_id), ]
 
 metadata_df <- cbind.data.frame(metadata_df, clsmap)
 
