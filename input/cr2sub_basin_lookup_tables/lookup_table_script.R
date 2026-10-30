@@ -1,103 +1,83 @@
-rm(list = ls())
+# -----------------------------------------------------------------------------
+# Script: lookup_table_script.R
+# Purpose: Build the lookup tables that assign each CR2SUB well to the
+#   CAMELS-CL v2 and BNA basins that contain it. Run from the repository
+#   root, after 01_consolidate.R (needs .tmp/<tag>_<version>_metadata.csv):
+#     Rscript input/cr2sub_basin_lookup_tables/lookup_table_script.R
+#   Rerun only when wells are added or removed.
+# Output: input/cr2sub_basin_lookup_tables/<tag>_<version>_join_table_with_*.csv
+#   (columns: cr2sub_id, basin id, basin area in km2)
+# -----------------------------------------------------------------------------
 
-# 1. Configurar directorio de trabajo
-# wd <- "/Users/rmarinao/Library/CloudStorage/Dropbox/RM_fdcyt_cag"
-# setwd(wd)
-tag <- "cr2sub"
-version <- "v1.2"
-
-# 2. Cargar librerías necesarias
 library(terra)
 
-# 3. Definir subdirectorio de salida y tipo de unidad territorial
-type <- "Communes"
+tag <- "cr2sub"
+version <- "v1.2"
+out_dir <- "input/cr2sub_basin_lookup_tables"
+metadata_file <- file.path(".tmp", paste0(tag, "_", version, "_metadata.csv"))
 
-# 4. Asociar tipo con nombre de columna identificadora
-basin_name_id <- c(
-  "camels_cl_v2021_basins" = "gauge_",
-  "bna_basins" = "bna_id",
-  "Communes" = "id"
-)[type]
-
-# 5. Leer vectores de pozos y polígonos SIN buffer
-wells_vect <- vect(
-  "OUT/attribute_data_frames/gwl/gwl_dga_attributes_epsg4326.gpkg"
-)
-
-somebasins_raw <- vect(
-  paste0("IN/polygons/", type, "_boundaries_epsg4326.gpkg")
-)
-
-# Función auxiliar para extraer join por área
-extract_by_area <- function(somebasins, wells_vect, grid, basin_name_id) {
-  to <- nrow(somebasins)
-  somebasins_list <- lapply(1:to, function(i) somebasins[i, ])
-  id <- sapply(somebasins_list, function(x) {
-    as.data.frame(x)[, basin_name_id]
-  })
-
-  somebasins_area <- lapply(
-    somebasins_list, rasterize, y = grid, field = "area"
-  )
-  somebasins_stack <- do.call(c, somebasins_area)
-  names(somebasins_stack) <- id
-
-  extract_matrix <- t(
-    terra::extract(somebasins_stack, wells_vect, ID = FALSE)
-  )
-  colnames(extract_matrix) <- wells_vect$well_id
-
-  id_vec <- array(
-    rownames(extract_matrix),
-    dim = dim(extract_matrix)
-  ) |> as.character()
-
-  wellcode <- t(array(
-    colnames(extract_matrix),
-    dim = rev(dim(extract_matrix))
-  )) |> as.character()
-
-  full_join <- data.frame(
-    well_id = wellcode,
-    id = id_vec,
-    area = round(as.numeric(extract_matrix), 4)
-  )
-  colnames(full_join) <- c("well_id", basin_name_id, "area")
-  full_join
+if (!file.exists(metadata_file)) {
+  stop("No se encontró la metadata en .tmp; ejecuta antes 01_consolidate.R.")
 }
 
-# 6. Crear grilla base
-grid <- terra::rast(
-  xmin = -76, xmax = -65, ymin = -57, ymax = -16,
-  res = 0.01, crs = "EPSG:4326"
-) |> crop(ext(somebasins_raw), snap = "out")
-
-# 7. Extraer join SIN buffer
-full_no_buffer <- extract_by_area(somebasins_raw, wells_vect, grid,
-                                  basin_name_id)
-
-# 8. Identificar pozos sin asignación
-no_match_ids <- unique(full_no_buffer$well_id[is.na(full_no_buffer$area)])
-wells_unmatched <- wells_vect[wells_vect$well_id %in% no_match_ids, ]
-
-# 9. Extraer join CON buffer solo para pozos sin asignación
-somebasins_buffered <- buffer(somebasins_raw, width = 500)
-full_buffered <- extract_by_area(somebasins_buffered, wells_unmatched,
-                                 grid, basin_name_id)
-
-# 10. Unir ambos resultados
-inner_no_buffer <- full_no_buffer[!is.na(full_no_buffer$area), ]
-inner_buffered <- full_buffered[!is.na(full_buffered$area), ]
-inner_join <- rbind(inner_no_buffer, inner_buffered)
-inner_join <- inner_join[order(inner_join$well_id), ]
-
-# 11. Exportar resultado
-if (!dir.exists(subdir)) dir.create(subdir)
-
-write.csv(
-  inner_join,
-  # paste0("cr2sub_v1.2_join_table_with_", type, ".csv"),
-  paste0(tag, "_", version, "_join_table_with_", type, ".csv"),
-  row.names = FALSE
+# Basin layers: file, name of the id column, and how the id is derived
+basin_types <- list(
+  camels_cl_v2_basins = list(
+    file = "input/camels_cl_basins/camels_cl_v2_boundaries.gpkg",
+    id_col = "gauge_id",
+    get_id = function(v) as.character(as.data.frame(v)[, "gauge_id"])
+  ),
+  bna_basins = list(
+    file = "input/BNA_basins/Cuencas_BNA.shp",
+    id_col = "bna_id",
+    get_id = function(v) as.character(as.numeric(as.data.frame(v)[, "COD_CUEN"]))
+  )
 )
 
+# Wells (cr2sub_id is 8 digits; restore leading zeros lost when stored as number)
+metadata <- read.csv(metadata_file)
+wells_vect <- vect(
+  data.frame(
+    well_id = sprintf("%08d", as.integer(metadata$cr2sub_id)),
+    lon = metadata$dga_well_lon,
+    lat = metadata$dga_well_lat
+  ),
+  geom = c("lon", "lat"), crs = "EPSG:4326"
+)
+
+# Basins that intersect each well (point or buffer), with their area (km2). Vector
+# intersection (low memory).
+match_wells <- function(wells, basins) {
+  pairs <- terra::relate(wells, basins, relation = "intersects", pairs = TRUE)
+  data.frame(
+    well_id = wells$well_id[pairs[, 1]],
+    id = basins$id[pairs[, 2]],
+    area = round(basins$area[pairs[, 2]], 4)
+  )
+}
+
+for (type in names(basin_types)) {
+  cfg <- basin_types[[type]]
+  basins <- vect(cfg$file) |> project("EPSG:4326")
+  basins$id <- cfg$get_id(basins)
+  basins$area <- expanse(basins, unit = "km")
+
+  # Basins that contain the well; wells that fall in none are retried within 500 m
+  inner_join <- match_wells(wells_vect, basins)
+
+  unmatched <- wells_vect[!wells_vect$well_id %in% inner_join$well_id, ]
+  if (nrow(unmatched) > 0) {
+    unmatched_buffer <- buffer(unmatched, width = 500)
+    unmatched_buffer$well_id <- unmatched$well_id
+    inner_join <- rbind(inner_join, match_wells(unmatched_buffer, basins))
+  }
+  inner_join <- unique(inner_join[order(inner_join$well_id, inner_join$area), ])
+  colnames(inner_join) <- c("cr2sub_id", cfg$id_col, "area")
+
+  write.csv(
+    inner_join,
+    file.path(out_dir, paste0(tag, "_", version, "_join_table_with_", type, ".csv")),
+    row.names = FALSE
+  )
+  message("[cr2sub] ", type, ": ", length(unique(inner_join$cr2sub_id)), " pozos asignados")
+}

@@ -54,14 +54,14 @@ clsoil_file <-
   "input/CLSoilMaps/cr2sub_CLSoilMaps_data.csv"
 
 basin_camels <-
-  vect("input/camels_cl_basins/catchments_camels_cl_v2021.shp")
+  vect("input/camels_cl_basins/camels_cl_v2_boundaries.gpkg")
 
 basin_bna <-
   vect("input/BNA_basins/Cuencas_BNA.shp") |> project(y = "epsg:4326")
 
 join_table_camels_basins <-
   sprintf(
-    "input/cr2sub_basin_lookup_tables/cr2sub_%s_join_table_with_camels_cl_v2021_basins.csv",
+    "input/cr2sub_basin_lookup_tables/cr2sub_%s_join_table_with_camels_cl_v2_basins.csv",
     version
   )
 join_table_bna_basins <-

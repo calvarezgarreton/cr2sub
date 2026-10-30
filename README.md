@@ -63,7 +63,7 @@ Metadata of the observation wells extracted from the _.xls_ files downloaded fro
 - cr2sub_mean_gwl_clean: mean depth of GWL without outliers (_m_), computed for all available data in _cr2sub_v1.2_gwl_mon_clean.csv_.<br>
 - cr2sub_sd_gwl_clean: standard deviation of GWL without outliers (_m_), computed for all available data in _cr2sub_v1.2_gwl_mon_clean.csv_.<br>	
 - cr2sub_cv_gwl_clean: coefficient of variation of GWL without outliers (_-_), computed as cr2sub_sd_gwl_clean/abs(cr2sub_mean_gwl_clean).<br>	
-- cr2sub_in_basin_camels: gauge_id from the smallest CAMELS-CL basin where the well is located. The basin was identified by intersecting the well location (cr2sub_lat, cr2sub_lon) with CAMELS-CL v2021 polygons and stored as a lookup table in _input_.<br>  
+- cr2sub_in_basin_camels: gauge_id from the smallest CAMELS-CL basin where the well is located. The basin was identified by intersecting the well location (cr2sub_lat, cr2sub_lon) with CAMELS-CL v2 polygons and stored as a lookup table in _input_.<br>  
 - cr2sub_camels_elev: mean elevation (_m a.s.l._) of the CAMELS-CL basin where the well is located, computed based on FABDEM resampled at 300-m.<br>  
 - cr2sub_camels_slp: mean slope (_degree_) of the CAMELS-CL basin where the well is located, computed based on FABDEM resampled at 300-m.<br>  
 - cr2sub_camels_pr_yr: mean annual precipitation (_mm_) of the CAMELS-CL basin where the well is located, computed based on CR2MET v2.5 for 1980-2010. CR2MET v2.5 daily data were downloaded from https://ftp.cr2.cl/browse/cr2met/v2.5 and processed into annual values (_input_).<br>  
@@ -92,7 +92,7 @@ Metadata of the observation wells extracted from the _.xls_ files downloaded fro
 ## input
 **BNA_basin_polygons**: shapefile with BNA basins boundaries downloaded from [DGA spatial data repository](https://dga.mop.gob.cl/mapoteca-digital/).<br>  
 
-**camels_cl_basins**: shapefile with CAMELS-CL v2021 basins boundaries downloaded from [CAMELS-CL platform](https://www.camels.cr2.cl/).<br>  
+**camels_cl_basins**: GeoPackage (_camels_cl_v2_boundaries.gpkg_, 860 basins) with CAMELS-CL v2 basins boundaries, from the [CAMELS-CL platform](https://www.camels.cr2.cl/).<br>  
 
 **CLSoilMaps**: soil data computed from [CLSoilMaps database](https://www.nature.com/articles/s41597-023-02536-x). The file _cr2sub_CLSoilMaps_data.csv_ holds the soil attributes already extracted for each well (500-m buffer). Only wells that are not in this file need the original CLSoilMaps rasters (~16.5 GB, not tracked in git): copy _.env.example_ to _.env_, set `CR2SUB_HEAVY_DATA` to a local folder, and run `Rscript scripts/00_download_clsoilmaps.R` (source: https://zenodo.org/records/7464210). The pipeline (_scripts/01b_extract_clsoilmaps.R_) then extracts the new wells and appends them to the file.
 
@@ -109,8 +109,6 @@ Metadata of the observation wells extracted from the _.xls_ files downloaded fro
 **other_data**:
 <small>
 - Chile_boundary_simplified_from_SIIT: shapefile with national boundaries downloaded from https://www.bcn.cl/siit/mapas_vectoriales. 
-- cr2sub_v1.2_join_table_with_bna_basins: lookup table with the codes of the BNA basin(s) in which the CR2SUB observation wells are located.<br>  
-- cr2sub_v1.2_join_table_with_camels_cl_v2021_basins: lookup table with the codes of the CAMELS-CL v2021 basin(s) in which the CR2SUB observation wells are located.<br>  
 </small>
 
 ## scripts
