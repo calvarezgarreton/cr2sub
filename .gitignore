@@ -16,7 +16,7 @@ notas
 # figures folder
 figures
 
-# internal review scripts/outputs, not part of the published pipeline
 
 # local paths
 .env
+.vscode
