@@ -24,9 +24,8 @@ Each version of CR2SUB lives in its own long-lived branch; folder and script pat
 | Branch | Content |
 |---|---|
 | `main` | Common documentation (no product version) |
-| `cr2sub_v1.1` | v1.1, published release (Zenodo) |
-| `cr2sub_v1.2` | v1.2 (in preparation) |
-| `cr2sub_v1.3` | v1.3, DGA transparency data update (October 2026) |
+| `cr2sub_v1.1` | **Obsolete.** Published release (Zenodo); superseded by v1.2 |
+| `cr2sub_v1.2` | **Current.** DGA transparency data update (October 2026) |
 
 Data in `input/` may differ between branches; each branch documents what it needs.
 
@@ -109,8 +108,6 @@ Metadata of the observation wells extracted from the _.xls_ files downloaded fro
 **other_data**:
 <small>
 - Chile_boundary_simplified_from_SIIT: shapefile with national boundaries downloaded from https://www.bcn.cl/siit/mapas_vectoriales. 
-- cr2sub_v1.1_join_table_with_bna_basins: lookup table with the codes of the BNA basin(s) in which the CR2SUB observation wells are located.<br>  
-- cr2sub_v1.1_join_table_with_camels_cl_v2021_basins: lookup table with the codes of the CAMELS-CL v2021 basin(s) in which the CR2SUB observation wells are located.<br>  
 </small>
 
 ## scripts
