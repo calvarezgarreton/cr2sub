@@ -5,7 +5,7 @@
 #   (Dinamarca et al., 2023). About 16.5 GB zipped; run only if there are new wells.
 # -----------------------------------------------------------------------------
 
-source("scripts/functions/functions_env.R")
+source("../scripts/functions/functions_env.R")
 load_dotenv()
 
 heavy <- Sys.getenv("CR2SUB_HEAVY_DATA")
