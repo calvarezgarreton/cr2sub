@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Extended v1.1 vs v1.2 comparison of attributes.csv, with focus on CLSoilMaps.
 
-Reads ../versions/{v1.1,v1.2}/*_attributes.csv and (optionally)
-../comparison_v1.1_vs_v1.2/clsoilmaps_reextraction.csv (made by
-validate_clsoilmaps_extraction.R). Writes CSVs/PNGs to ../comparison_v1.1_vs_v1.2/
-and prints a summary.
+Reads ../versions/{v1.1,v1.2}/*_attributes.csv. Writes CSVs/PNGs to
+../comparison_v1.1_vs_v1.2/ and prints a summary. In v1.2 the CLSoilMaps values
+are extracted from the original rasters for all wells (scripts/01b_extract_clsoilmaps.R);
+v1.1 holds the values from the original, earlier extraction.
 
 Usage (needs pandas, numpy, matplotlib):
     python3 compare_attributes.py
@@ -79,12 +79,11 @@ chk = {
 }
 print("\nphysical checks (wells failing):", chk)
 
-# wells whose coordinates changed but soil was not recomputed
-moved = col_diffs.set_index("column").loc["dga_well_lat", "differ"]
+# wells whose coordinates changed between versions
 chg = common[((o.dga_well_lat - n.dga_well_lat).abs() > 0.01) | ((o.dga_well_lon - n.dga_well_lon).abs() > 0.01)]
 print(f"\nwells with changed coordinates (>0.01 deg): {len(chg)} ->", list(chg))
-print("  their soil values are identical v1.1 vs v1.2 (not recomputed from new location):",
-      bool(same.loc[chg].all()) if len(chg) else "n/a")
+print("  soil values differ v1.1 vs v1.2 (recomputed from new location):",
+      bool((~same.loc[chg]).all()) if len(chg) else "n/a")
 
 # 4. Spatial coherence between neighbouring wells ---------------------------------
 lat = np.radians(new.cr2sub_lat.values)
@@ -119,41 +118,39 @@ for wid in (5120007, 5120011):
     t.insert(0, "dist_km", [0.0, *np.round(dist[i][order], 1)])
     print(f"well {wid}:"); print(t.round(2).to_string())
 
-# 5. Re-extraction vs stored values ---------------------------------------------
-rx = OUT / "clsoilmaps_reextraction.csv"
-if rx.exists():
-    import matplotlib
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
+# 5. v1.1 (original extraction) vs v1.2 (extracted from rasters) -------------------
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 
-    re = pd.read_csv(rx).set_index("cr2sub_id")
-    ids = new.index.intersection(re.index)
-    res = []
-    fig, axs = plt.subplots(2, 5, figsize=(18, 7))
-    for ax, c in zip(axs.ravel(), SOIL):
-        a, b = new.loc[ids, c], re.loc[ids, c]
-        ok = a.notna() & b.notna()
-        d = (a - b).abs()[ok]
-        rel = (d / a[ok].abs().clip(lower=1e-9))
-        res.append(dict(variable=c, n=int(ok.sum()), n_na_stored=int(a.isna().sum()),
-                        n_na_reextracted=int(b.isna().sum()),
-                        corr=float(np.corrcoef(a[ok], b[ok])[0, 1]),
-                        median_abs_diff=float(d.median()), p95_abs_diff=float(d.quantile(.95)),
-                        max_abs_diff=float(d.max()), median_rel_diff_pct=float(rel.median() * 100),
-                        n_identical=int((d < 1e-3).sum())))
-        ax.scatter(a[ok], b[ok], s=4, alpha=.5)
-        lim = [min(a[ok].min(), b[ok].min()), max(a[ok].max(), b[ok].max())]
-        ax.plot(lim, lim, "k--", lw=.8)
-        ax.set_title(c.replace("cr2sub_clsoilmap_", ""), fontsize=9)
-        ax.set_xlabel("stored (v1.1/v1.2 CSV)", fontsize=7); ax.set_ylabel("re-extracted", fontsize=7)
-    fig.suptitle("CLSoilMaps: stored values vs re-extraction with scripts/functions/functions_clsoilmaps.R")
-    fig.tight_layout(); fig.savefig(OUT / "clsoilmaps_stored_vs_reextracted.png", dpi=110)
-    res = pd.DataFrame(res)
-    res.to_csv(OUT / "clsoilmaps_reextraction_diffs.csv", index=False)
-    print("\n== Re-extraction vs stored values ==")
-    print(res.round(3).to_string(index=False))
-    worst = (re.loc[ids, SOIL] - new.loc[ids, SOIL]).abs().div(new[SOIL].std()).max(axis=1).sort_values(ascending=False).head(10)
-    print("\n10 wells with the largest standardized difference:")
-    print(worst.round(2).to_string())
-    na_diff = ids[(new.loc[ids, SOIL].isna().any(axis=1)) != (re.loc[ids, SOIL].isna().any(axis=1))]
-    print("wells where NA status differs (stored vs re-extracted):", len(na_diff), list(na_diff)[:10])
+res = []
+fig, axs = plt.subplots(2, 5, figsize=(18, 7))
+for ax, c in zip(axs.ravel(), SOIL):
+    a, b = so[c], sn[c]
+    ok = a.notna() & b.notna()
+    d = (a - b).abs()[ok]
+    rel = d / a[ok].abs().clip(lower=1e-9)
+    res.append(dict(variable=c, n=int(ok.sum()), na_to_value=int((a.isna() & b.notna()).sum()),
+                    value_to_na=int((a.notna() & b.isna()).sum()),
+                    corr=float(np.corrcoef(a[ok], b[ok])[0, 1]),
+                    median_abs_diff=float(d.median()), p95_abs_diff=float(d.quantile(.95)),
+                    max_abs_diff=float(d.max()), median_rel_diff_pct=float(rel.median() * 100),
+                    p95_rel_diff_pct=float(rel.quantile(.95) * 100),
+                    n_identical=int((d < 1e-3).sum())))
+    ax.scatter(a[ok], b[ok], s=4, alpha=.5)
+    lim = [min(a[ok].min(), b[ok].min()), max(a[ok].max(), b[ok].max())]
+    ax.plot(lim, lim, "k--", lw=.8)
+    ax.set_title(c.replace("cr2sub_clsoilmap_", ""), fontsize=9)
+    ax.set_xlabel("v1.1 (original extraction)", fontsize=7); ax.set_ylabel("v1.2 (from rasters)", fontsize=7)
+fig.suptitle("CLSoilMaps: v1.1 vs v1.2 (common wells with data in both)")
+fig.tight_layout(); fig.savefig(OUT / "clsoilmaps_v1.1_vs_v1.2.png", dpi=110)
+res = pd.DataFrame(res)
+res.to_csv(OUT / "clsoilmaps_v1.1_vs_v1.2_diffs.csv", index=False)
+print("\n== CLSoilMaps v1.1 vs v1.2, value by value ==")
+print(res.round(3).to_string(index=False))
+dd = (sn - so).abs().div(new[SOIL].std())
+worst = dd.max(axis=1).dropna().sort_values(ascending=False).head(10)
+print("\n10 wells with the largest standardized difference (v1.2 - v1.1):")
+print(worst.round(2).to_string())
+na_flip = common[so.isna().any(axis=1) != sn.isna().any(axis=1)]
+print("wells where NA status differs:", len(na_flip), list(na_flip))

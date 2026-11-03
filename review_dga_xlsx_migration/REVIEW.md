@@ -167,7 +167,7 @@ Generado con [`scripts/compare_attributes.py`](scripts/compare_attributes.py)
 | `cr2sub_mean/sd/cv_gwl` (raw y clean) | 61 a 142 | Ver I.3 e I.5 |
 | `cr2sub_*camels*` | 273 cambian de cuenca, 77 pasan de NA a tener cuenca, 1 pasa a NA | CAMELS-CL v1 (516 cuencas) → v2 (860 cuencas) |
 | `cr2sub_*bna*` | 9 | Nuevo criterio: cuenca que contiene al pozo, con buffer de 500 m solo si no cae en ninguna (antes el buffer se aplicaba a todos los pozos) |
-| `cr2sub_clsoilmap_*` | 0 | Ver I.8 |
+| `cr2sub_clsoilmap_*` | 630 a 960 | Mediana de la diferencia relativa de 0,06 % a 0,5 %; ver I.8 |
 
 Pozos sin cuenca CAMELS: 310 en v1.1 → 230 en v1.2. El pozo `5221007`
 (PAPUDO Y ZAPALLAR, mismas coordenadas) tenía cuenca CAMELS en v1 y no en v2.
@@ -211,18 +211,37 @@ la diferencia es 254 m de elevación y 63 mm de precipitación.
 
 ## I.8 CLSoilMaps entre versiones
 
-**v1.1 vs v1.2.** Los valores de suelo son idénticos en 1131 de los 1133
-pozos comunes. Los otros 2 son los pozos nuevos (`05120007` y `05120011`) que
-v1.1 tenía en NA y que ahora se extrajeron de los rasters. Pozos con suelo en
-NA: 66 de 1133 (fuera de la cobertura de CLSoilMaps).
+**Cambio de método.** En v1.1 los valores de suelo venían de una extracción
+original anterior (D. Dinamarca), de la que no tenemos el script. En v1.2 se
+extraen **todos** los pozos desde los rasters de CLSoilMaps con
+[`scripts/01b_extract_clsoilmaps.R`](../scripts/01b_extract_clsoilmaps.R)
+(promedio en un buffer de 500 m alrededor del pozo); ya no se hereda el CSV
+anterior. Salidas de esta comparación: `clsoilmaps_v1.1_vs_v1.2_diffs.csv` y
+`clsoilmaps_v1.1_vs_v1.2.png` en `comparison_v1.1_vs_v1.2/`.
 
-**Pozos con coordenadas cambiadas.** Los tres pozos con mayor diferencia
-entre el valor guardado y la re-extracción son `4308010`, `1700042` y
-`8114002`, que cambiaron de coordenadas entre v1.1 y v1.2 (I.2); su
-valor guardado es idéntico al de v1.1. El cuarto pozo con coordenadas
-cambiadas, `4400037`, tiene valor guardado (AWC 0-100 cm: 94,7 mm) y la
-re-extracción da NA. `6011022` y `4400017` están en NA en el valor guardado
-y tienen dato en la re-extracción (136,7 y 124,4 mm).
+**v1.1 vs v1.2** (1064 pozos con dato en ambas versiones): correlación 0,997
+a 0,999 en las 10 variables; mediana de la diferencia relativa 0,06 % a
+0,5 %; percentil 95 de 0,3 % a 4,6 %. Entre 104 y 596 pozos por variable son
+idénticos al milésimo. La mediana de la diferencia en AWC 0-100 cm es 0,1 mm
+(mediana de la variable: 136 mm). La coincidencia es alta, pero no exacta,
+así que el método original no era el mismo que el actual.
+
+**Pozos con coordenadas cambiadas** (I.2). Cambian de valor al re-extraer
+desde la ubicación nueva: `4308010` (AWC 0-100 cm: 146,4 → 135,1 mm),
+`1700042` (133,8 → 141,6) y `8114002` (215,2 → 230,8). `4400037` tenía valor
+(94,7 mm) y ahora queda en NA.
+
+**Cambios entre valor y NA.** `4400017` y `6011022` estaban en NA en v1.1 y
+ahora tienen dato (124,4 y 136,7 mm) con las mismas coordenadas, y los dos
+pozos nuevos (`05120007` y `05120011`) tampoco existían en v1.1. Con `4400037`
+son 5 pozos cuyo estado NA cambia. Pozos con suelo en NA: 68 en v1.1 y 65 en
+v1.2, de 1133 (fuera de la cobertura de CLSoilMaps).
+
+**Pozos con diferencia grande sin cambio de coordenadas.** `4320007` pasa de
+138,4 a 121,2 mm de AWC 0-100 cm (la mayor diferencia, 17 mm) con las mismas
+coordenadas. La diferencia máxima en ksat 0-100 cm es 52 cm/día. Como no
+tenemos el script original, no se puede determinar la causa (por ejemplo, el
+tratamiento de las celdas parciales del buffer).
 
 # Parte II — Comparación con la DGA (solo v1.2)
 
@@ -277,13 +296,12 @@ Ni entre versiones ni contra la DGA.
 
 ## III.1 CLSoilMaps
 
-Scripts: [`scripts/validate_clsoilmaps_extraction.R`](scripts/validate_clsoilmaps_extraction.R)
-(re-extrae el suelo de todos los pozos con los rasters originales) y
-`compare_attributes.py`. Salidas: `clsoilmaps_*.csv` y
-`clsoilmaps_stored_vs_reextracted.png` en `comparison_v1.1_vs_v1.2/`.
+Script: `compare_attributes.py`. Salidas: `clsoilmaps_*.csv` y
+`clsoilmaps_v1.1_vs_v1.2.png` en `comparison_v1.1_vs_v1.2/`. La comparación
+con la v1.1 está en I.8.
 
 **Coherencia espacial.** Para cada pozo y su vecino más cercano a menos de
-5 km (884 pares), la correlación del valor de suelo es 0,77 a 0,95 (por
+5 km (885 pares), la correlación del valor de suelo es 0,78 a 0,95 (por
 ejemplo arena 0-100 cm: 0,95; arcilla 0-100 cm: 0,92), frente a ~0 para
 pares al azar. Los dos pozos nuevos tienen AWC 0-100 cm de 130 y 126 mm;
 sus tres vecinos más cercanos van de 120 a 139 mm.
@@ -292,12 +310,7 @@ sus tres vecinos más cercanos van de 120 a 139 mm.
 0,7 y 2,0 g/cm³ en todos los pozos. Hay 9 pozos con arcilla + arena > 100 %
 en 100-200 cm.
 
-**Re-extracción vs valores guardados** (1066 pozos con dato en ambos):
-correlación 0,997 a 0,999; mediana de la diferencia relativa 0,06 % a 0,5 %.
-Entre 106 y 598 pozos por variable son idénticos al milésimo; la mediana de
-la diferencia en AWC 0-100 cm es 0,1 mm (mediana de la variable: 136 mm).
-
-**F. CLSoilMaps.** Mapa de AWC, arcilla y ksat; 66 pozos sin dato (cruces
+**F. CLSoilMaps.** Mapa de AWC, arcilla y ksat; 65 pozos sin dato (cruces
 rojas). La comparación numérica está en I.8 y III.1.
 
 ![F. CLSoilMaps en v1.2](comparison_v1.1_vs_v1.2/fig_f_soil_map.png)
@@ -321,7 +334,6 @@ Todo junto (tras `main_pipeline.py`): `review_dga_xlsx_migration/scripts/regener
 ```bash
 cd review_dga_xlsx_migration/scripts
 python3 compare_outputs.py        # series y metadatos; solo stdlib
-Rscript ../../review_dga_xlsx_migration/scripts/validate_clsoilmaps_extraction.R   # desde la raíz del repo
 python3 compare_attributes.py     # atributos y CLSoilMaps; pandas, matplotlib
 python3 compare_plots.py          # figuras A-F; pandas, matplotlib
 python3 compare_vs_dga.py         # Parte II, contra el export DGA; openpyxl, pyproj
