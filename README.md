@@ -23,7 +23,7 @@ Each version lives in its own branch with the same folder structure (see [docs/v
 - **New DGA source**: single export obtained through the Transparency Law (see [Data source](#data-source-v12)). Series now extend to August 2026 (v1.1 ended in December 2024).
 - **1,133 wells** (v1.1: 1,137). Four wells of the Taltal basin are not in the new export.
 - **CAMELS-CL v2** basins (860) replace CAMELS-CL v1 (516); basin assignment now uses the basin that contains the well.
-- **CLSoilMaps extraction** is part of the pipeline; the heavy rasters are only needed for new wells.
+- **CLSoilMaps extraction** is part of the pipeline and requires the heavy rasters (~16.5 GB).
 - **Self-contained pipeline**: local paths go in `.env`, and the review of v1.1 vs v1.2 is in `review_dga_xlsx_migration/`.
 
 ## Data source (v1.2)
@@ -56,10 +56,10 @@ The v1.2 groundwater level data were requested from the DGA under the Chilean Tr
 | `cr2sub_basin_lookup_tables/` | Well-to-basin tables and the script that builds them |
 | `dem/` | FABDEM elevation and slope, 300 m ([source](https://data.bris.ac.uk/data/dataset/s5hqmjcdj8yo2ibzi9b4ew3sn)) |
 | `cr2met/` | CR2MET v2.5 annual precipitation, PET and snowfall ([source](https://ftp.cr2.cl/browse/cr2met/v2.5)) |
-| `CLSoilMaps/` | Soil attributes already extracted for each well |
+| `CLSoilMaps/` | Soil attributes extracted for each well by `01b_extract_clsoilmaps.R` (output of the pipeline) |
 | `other_data/` | Simplified national boundary (BCN-SIIT), used to validate well coordinates |
 
-The CLSoilMaps rasters are large (~16.5 GB) and are not in git. They are only needed when new wells are added: copy `.env.example` to `.env`, set `CR2SUB_HEAVY_DATA` to a local folder and run `Rscript scripts/00_download_clsoilmaps.R` ([source](https://zenodo.org/records/7464210)).
+The CLSoilMaps rasters are large (~16.5 GB) and are not in git. They are required by step 01b: copy `.env.example` to `.env`, set `CR2SUB_HEAVY_DATA` to a local folder and run `Rscript scripts/00_download_clsoilmaps.R` ([source](https://zenodo.org/records/7464210)).
 
 ## Running the pipeline
 
@@ -72,7 +72,7 @@ python3 scripts/main_pipeline.py
 | Step | Script | Does |
 |---|---|---|
 | 01 | `01_consolidate.R` | Reads the DGA export, builds well metadata and monthly series |
-| 01b | `01b_extract_clsoilmaps.R` | Adds soil attributes for wells not yet in `input/CLSoilMaps/` |
+| 01b | `01b_extract_clsoilmaps.R` | Extracts soil attributes for all wells from the CLSoilMaps rasters into `input/CLSoilMaps/` |
 | 02 | `02_remove_outliers.ipynb` | Outlier removal |
 | 03 | `03_process_attributes.R` | Builds `cr2sub_v1.2_attributes.csv` |
 
