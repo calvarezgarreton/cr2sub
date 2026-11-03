@@ -165,7 +165,7 @@ Generado con [`scripts/compare_attributes.py`](scripts/compare_attributes.py)
 | `dga_well_basin` / `subbasin` / `name` | 1133 / 712 / 45 | El texto cambia de formato (`RIO COPIAPO` → `R.  Copiapo`; `EL TRANSITO` → `POZO EL TRANSITO`) |
 | Coordenadas y cota `dga_*` / `cr2sub_*` | 14 a 33 según columna | Ver I.2; `cr2sub_elev` y `cr2sub_slp` cambian en 14 pozos |
 | `cr2sub_mean/sd/cv_gwl` (raw y clean) | 61 a 142 | Ver I.3 e I.5 |
-| `cr2sub_*camels*` | 273 cambian de cuenca, 77 pasan de NA a tener cuenca, 1 pasa a NA | CAMELS-CL v1 (516 cuencas) → v2 (860 cuencas) |
+| `cr2sub_*camels*` | 306 cambian de cuenca, 77 pasan de NA a tener cuenca, 1 pasa a NA | CAMELS-CL v1 (516 cuencas) → v2 (860 cuencas) |
 | `cr2sub_*bna*` | 9 | Nuevo criterio: cuenca que contiene al pozo, con buffer de 500 m solo si no cae en ninguna (antes el buffer se aplicaba a todos los pozos) |
 | `cr2sub_clsoilmap_*` | 630 a 960 | Mediana de la diferencia relativa de 0,06 % a 0,5 %; ver I.8 |
 
@@ -198,10 +198,10 @@ se excluyen los de cota 0); la mediana de |diferencia| es 9,8 m.
 
 ![C. Ubicación y cota](comparison_v1.1_vs_v1.2/fig_c_location.png)
 
-**D. Cuencas CAMELS.** De los 553 pozos que mantienen el mismo `gauge_id`,
-cambian elevación (mediana 4,9 m, p95 58 m) y precipitación (mediana
-0,35 mm, p95 29 mm). En los 273 pozos que cambian de cuenca, la mediana de
-la diferencia es 254 m de elevación y 63 mm de precipitación.
+**D. Cuencas CAMELS.** De los 520 pozos que mantienen el mismo `gauge_id`,
+cambian elevación (mediana 3,1 m, p95 102 m) y precipitación (mediana
+0,37 mm, p95 29 mm). En los 306 pozos que cambian de cuenca, la mediana de
+la diferencia es 223 m de elevación y 50 mm de precipitación.
 
 ![D. Atributos de la cuenca CAMELS](comparison_v1.1_vs_v1.2/fig_d_camels.png)
 
