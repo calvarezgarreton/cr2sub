@@ -57,17 +57,17 @@ The period-based columns use the configured start and end years in their names (
 | `BNA_basins/` | BNA basin boundaries, from the [DGA repository](https://dga.mop.gob.cl/mapoteca-digital/) |
 | `cr2sub_basin_lookup_tables/` | Well-to-basin tables and the script that builds them |
 | `dem/` | FABDEM elevation and slope, 300 m ([source](https://data.bris.ac.uk/data/dataset/s5hqmjcdj8yo2ibzi9b4ew3sn)) |
-| `cr2met/` | CR2MET download and daily-processing scripts, plus the annual NetCDF rasters used by the pipeline; daily source files and monthly intermediate rasters stay under `CR2MET_DATA_DIR` ([source](https://ftp.cr2.cl/browse/cr2met/v2.5)) |
+| `cr2met/` | CR2MET download and daily-processing scripts, plus the annual NetCDF rasters used by the pipeline; daily source files stay under `CR2MET_DATA_DIR` ([source](https://ftp.cr2.cl/browse/cr2met/v2.5)) |
 | `CLSoilMaps/` | Version-specific soil attributes CSV, named with the CR2SUB tag and version; generated for all wells when missing, then updated for new wells |
 | `other_data/` | Simplified national boundary (BCN-SIIT), used to validate well coordinates |
 
 The CLSoilMaps rasters are large (~16.5 GB) and are not in git. They are needed when the version-specific CSV is first generated or when new wells are added: copy `.env.example` to `.env`, set `CR2SUB_HEAVY_DATA` to a local folder, then run `cd input/CLSoilMaps && Rscript download_clsoilmaps.R` from the repository root ([source](https://zenodo.org/records/7464210)).
 
-CR2MET daily NetCDF files and monthly intermediate rasters are kept outside the repository in the folder configured by `CR2MET_DATA_DIR` in `.env`. Install the Python requirements with `python3 -m pip install -r scripts/functions/python_requirements.txt`, then, from the repository root, download the daily files with `python3 input/cr2met/download_cr2met_ftp.py` and create the monthly/yearly rasters with `python3 input/cr2met/process_cr2met_daily.py`. The monthly files are written under `CR2MET_DATA_DIR/v2.5_v2.5_R1_mon_yr/`; the annual files are written to `input/cr2met/`, consumed by the main pipeline, and can be versioned in Git.
+CR2MET daily NetCDF files are kept outside the repository in the folder configured by `CR2MET_DATA_DIR` in `.env`. Install the Python requirements with `python3 -m pip install -r scripts/functions/python_requirements.txt`, then, from the repository root, download the daily files with `python3 input/cr2met/download_cr2met_ftp.py` and generate annual rasters with `python3 input/cr2met/process_cr2met_daily.py`. The processor reads daily inputs from `CR2MET_DATA_DIR` and writes only annual files to `input/cr2met/`; these are consumed by the main pipeline and can be versioned in Git.
 
 ## Running the pipeline
 
-Configure the tag, version, statistical period, input/output paths, CLSoilMaps buffer and diagnostic plot settings in `scripts/main_pipeline.py`. For a new CR2MET release, update its paths there. `.env` defines `CR2SUB_HEAVY_DATA` for the large CLSoilMaps rasters and `CR2MET_DATA_DIR` for CR2MET daily downloads and monthly intermediate rasters. The processor writes annual aggregates to `input/cr2met/`, where the pipeline reads them.
+Configure the tag, version, statistical period, input/output paths, CLSoilMaps buffer and diagnostic plot settings in `scripts/main_pipeline.py`. For a new CR2MET release, update its paths there. `.env` defines `CR2SUB_HEAVY_DATA` for the large CLSoilMaps rasters and `CR2MET_DATA_DIR` for CR2MET daily downloads. The processor writes annual aggregates to `input/cr2met/`, where the pipeline reads them.
 
 Requires R (packages `readxl`, `zoo`, `terra`, `sf`, `dplyr`, `readr`, `tibble`) and Python with the packages in `scripts/functions/python_requirements.txt`. Configure `.env` as described above. From the repository root:
 

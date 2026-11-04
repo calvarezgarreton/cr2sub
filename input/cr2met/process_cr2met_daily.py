@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Resume los archivos diarios de CR2MET en archivos mensuales y anuales."""
+"""Resume los archivos diarios de CR2MET en archivos anuales."""
 
 from datetime import datetime
 import os
@@ -171,7 +171,7 @@ def escribir_periodo(archivo, indice, fecha, valores):
 def procesar_producto(
     producto, agregacion, fin_v25, archivos_v25, archivos_r1, inicio, fin
 ):
-    """Genera un archivo mensual y otro anual para una variable."""
+    """Genera un archivo anual para una variable."""
     archivos = list(archivos_v25)
     archivos.extend(
         archivo for archivo in archivos_r1 if mes_del_archivo(archivo) > fin_v25
@@ -192,28 +192,18 @@ def procesar_producto(
         ejemplo = ", ".join(f"{anio}-{mes:02d}" for anio, mes in faltantes[:5])
         raise ValueError(f"Faltan meses de datos: {ejemplo}")
 
-    carpeta_salida_mensual = (
-        carpeta_cr2met() / "v2.5_v2.5_R1_mon_yr"
-    )
-    carpeta_salida_mensual.mkdir(parents=True, exist_ok=True)
     CARPETA_SALIDA.mkdir(parents=True, exist_ok=True)
     inicio_nombre = etiqueta_anio(FECHA_INICIO)
     fin_nombre = etiqueta_anio(FECHA_FIN)
-    salida_mensual = carpeta_salida_mensual / (
-        f"CR2MET_{producto}_v2.5_v2.5_R1_mon_{inicio_nombre}_{fin_nombre}.nc"
-    )
     salida_anual = CARPETA_SALIDA / (
         f"CR2MET_{producto}_v2.5_v2.5_R1_yr_{inicio_nombre}_{fin_nombre}.nc"
     )
-    temporal_mensual = salida_mensual.with_suffix(".tmp.nc")
     temporal_anual = salida_anual.with_suffix(".tmp.nc")
 
-    archivo_mensual = None
     archivo_anual = None
     suma_anual = None
     dias_anuales = None
     anio_actual = None
-    indice_mensual = 0
     indice_anual = 0
     muestra = None
 
@@ -260,11 +250,8 @@ def procesar_producto(
                 continue
             diario = diario[dias_seleccionados]
 
-            if archivo_mensual is None:
+            if archivo_anual is None:
                 muestra = {"lat": latitud, "lon": longitud}
-                archivo_mensual = crear_archivo_salida(
-                    temporal_mensual, producto, muestra, agregacion, atributos
-                )
                 archivo_anual = crear_archivo_salida(
                     temporal_anual, producto, muestra, agregacion, atributos
                 )
@@ -280,19 +267,6 @@ def procesar_producto(
             dias_validos = np.isfinite(diario)
             cantidad_dias = dias_validos.sum(axis=0)
             suma_dias = np.where(dias_validos, diario, 0).sum(axis=0)
-
-            if agregacion == "sum":
-                valor_mensual = np.where(cantidad_dias > 0, suma_dias, np.nan)
-            else:
-                valor_mensual = np.divide(
-                    suma_dias,
-                    cantidad_dias,
-                    out=np.full_like(suma_dias, np.nan),
-                    where=cantidad_dias > 0,
-                )
-
-            escribir_periodo(archivo_mensual, indice_mensual, (anio, mes), valor_mensual)
-            indice_mensual += 1
 
             if anio_actual is not None and anio != anio_actual:
                 valor_anual = calcular_valor(suma_anual, dias_anuales, agregacion)
@@ -312,20 +286,13 @@ def procesar_producto(
 
         valor_anual = calcular_valor(suma_anual, dias_anuales, agregacion)
         escribir_periodo(archivo_anual, indice_anual, (anio_actual, 1), valor_anual)
-        archivo_mensual.close()
         archivo_anual.close()
-        archivo_mensual = None
         archivo_anual = None
-        temporal_mensual.replace(salida_mensual)
         temporal_anual.replace(salida_anual)
-        print(f"Guardado: {salida_mensual}")
         print(f"Guardado: {salida_anual}")
     finally:
-        if archivo_mensual is not None:
-            archivo_mensual.close()
         if archivo_anual is not None:
             archivo_anual.close()
-        temporal_mensual.unlink(missing_ok=True)
         temporal_anual.unlink(missing_ok=True)
 
 
@@ -343,9 +310,7 @@ def calcular_valor(suma, cantidad, agregacion):
 
 def main():
     try:
-        carpeta_salida_mensual = (
-            carpeta_cr2met() / "v2.5_v2.5_R1_mon_yr"
-        )
+        carpeta_cr2met()
     except (OSError, RuntimeError) as error:
         print(f"Error de configuración: {error}", file=sys.stderr)
         return 1
@@ -406,10 +371,7 @@ def main():
         )
         return 1
 
-    print(
-        "\nProceso terminado. Mensuales: "
-        f"{carpeta_salida_mensual}; anuales: {CARPETA_SALIDA}"
-    )
+    print(f"\nProceso terminado. Archivos anuales guardados en: {CARPETA_SALIDA}")
     return 0
 
 
