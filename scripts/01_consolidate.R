@@ -15,6 +15,8 @@ library(readxl)
 library(zoo)
 library(terra)
 
+source("scripts/functions/functions_pipeline_config.R")
+
 # Load custom helper functions for directory creation, coordinate conversion
 source("scripts/functions/functions_consolidate_cr2sub.R")
 
@@ -22,21 +24,23 @@ source("scripts/functions/functions_consolidate_cr2sub.R")
 # Section: Configuration
 # -----------------------------------------------------------------------------
 
-tag <- "cr2sub"
-version <- "v1.2"
-out_folder <- file.path(tag)
-project_tmp_dir <- file.path(".tmp")
-system_tmp_dir <- file.path(tempdir(), "cr2sub")
+tag <- pipeline_config("tag")
+version <- pipeline_config("version")
+out_folder <- pipeline_config("output_dir")
+project_tmp_dir <- pipeline_config("tmp_dir")
+input_file <- pipeline_config("dga_input_file")
+chile_boundaries_file <- pipeline_config("chile_boundaries_file")
+metadata_file <- pipeline_config("metadata_file")
+gwl_ts_file <- pipeline_config("gwl_ts_file")
+system_tmp_dir <- file.path(tempdir(), tag)
 
 create_dir_if_not_exists(out_folder)
 create_dir_if_not_exists(project_tmp_dir)
 create_dir_if_not_exists(system_tmp_dir)
 
 # -----------------------------------------------------------------------------
-# Section: Discover Input File
+# Section: Input File
 # -----------------------------------------------------------------------------
-
-input_file <- file.path("input/DGA_GWL_obs_descarga", "AM006T0034616_1.xlsx")
 
 if (!file.exists(input_file)) {
   stop(sprintf("No se encontró el archivo %s", input_file))
@@ -132,20 +136,14 @@ details_vect <- vect(details,
   crs = "epsg:4326"
 )
 
-chile_boundaries <-
-  vect("input/other_data/Chile_boundaries_simplified_from_SIIT.gpkg")
+chile_boundaries <- vect(chile_boundaries_file)
 
 points_in_chile <- mask(details_vect, chile_boundaries)
 
 flag_details <- details$cr2sub_id %in% points_in_chile$cr2sub_id
 details_filtered <- details[flag_details, ]
 
-write.csv(details_filtered, file.path(
-  project_tmp_dir,
-  paste0(tag, "_", version, "_metadata.csv")
-),
-row.names = FALSE
-)
+write.csv(details_filtered, metadata_file, row.names = FALSE)
 
 # -----------------------------------------------------------------------------
 # Section: Merge Time Series By Well
@@ -213,7 +211,7 @@ df_mon <- data.frame(
 
 write.csv(
   df_mon,
-  file.path(out_folder, paste0(tag, "_", version, "_gwl_mon.csv")),
+  gwl_ts_file,
   quote = FALSE,
   row.names = FALSE
 )

@@ -1,10 +1,12 @@
 # Soil Database for cr2sub wells
 
-File name: **cr2sub_CLSoilMap_data**
+File name: `cr2sub_CLSoilMaps_data_{tag}_{version}.csv` (for example,
+`cr2sub_CLSoilMaps_data_cr2sub_v1.2.csv`). The tag and version are configured
+in `scripts/main_pipeline.py`.
 
 ## General description
 
-This file contains a database of soil variables associated with wells distributed across different regions of Chile. The data were extracted from the **CLSoilMaps** product (Dinamarca et al., 2023), a national database of soil properties.
+This file contains a database of soil variables associated with wells across Chile. The data were extracted from **CLSoilMaps** (Dinamarca et al., 2023), a national database of soil properties.
 
 ## Content details
 
@@ -15,7 +17,7 @@ This file contains a database of soil variables associated with wells distribute
 
 ## Contained variables
 
-The following soil properties were extracted for each well:
+The CSV contains ten CLSoilMaps attributes per well. Each value is the mean within a 500 m buffer around that well.
 
 | Variable | Description             | Unit   |
 | -------- | ----------------------- | ------ |
@@ -25,18 +27,17 @@ The following soil properties were extracted for each well:
 | `Bulkd`  | Bulk density            | g/cm³  |
 | `AWC`    | Available water content | mm     |
 
-These variables are reported for each of the following 6 soil horizons:
+The CSV reports each property for two depth ranges:
 
-* 0–5 cm
-* 5–15 cm
-* 15–30 cm
-* 30–60 cm
-* 60–100 cm
+* 0–100 cm
 * 100–200 cm
 
-The column names in the file follow the structure:
-`<variable>_<depth>`
-For example: `ksat_0_5`, `clay_5_15`, `bulkd_30_60`, etc.
+The identifier column is `cr2sub_id`; the other columns use the prefix
+`cr2sub_clsoilmap_` followed by the property and depth, for example
+`cr2sub_clsoilmap_awc_0_100cm` and
+`cr2sub_clsoilmap_ksat_100_200cm`. The 0–100 cm values are calculated from
+the five source layers from 0 to 100 cm; the 100–200 cm values come from the
+100–200 cm source layer.
 
 ## Synthetic horizon: 0–100 cm
 
@@ -72,7 +73,11 @@ $$
 
 # Base de datos de suelos de pozos de Chile
 
-Nombre archivo: cr2sub_CLSoilMaps_data.csv
+Nombre archivo: `cr2sub_CLSoilMaps_data_{tag}_{version}.csv`
+
+El pipeline define `{tag}` y `{version}` en `scripts/main_pipeline.py` (por
+ejemplo, `cr2sub_CLSoilMaps_data_cr2sub_v1.2.csv`) para mantener cada versión
+separada y facilitar su comparación.
 
 ## Descripción general
 
@@ -87,7 +92,7 @@ Este archivo contiene una base de datos de variables de suelo asociadas a pozos 
 
 ## Variables contenidas
 
-Las siguientes propiedades del suelo fueron extraídas para cada pozo:
+El CSV contiene diez atributos CLSoilMaps por pozo. Cada valor corresponde al promedio dentro de un buffer de 500 m alrededor del pozo.
 
 | Variable | Descripción              | Unidad |
 | -------- | ------------------------ | ------ |
@@ -97,18 +102,17 @@ Las siguientes propiedades del suelo fueron extraídas para cada pozo:
 | `Bulkd`  | Densidad aparente        | g/cm³  |
 | `AWC`    | Humedad aprovechable     | mm     |
 
-Estas variables se presentan para cada uno de los siguientes 6 horizontes de suelo:
+El CSV presenta cada propiedad para dos rangos de profundidad:
 
-* 0–5 cm
-* 5–15 cm
-* 15–30 cm
-* 30–60 cm
-* 60–100 cm
+* 0–100 cm
 * 100–200 cm
 
-Los nombres de las columnas en el archivo siguen la estructura:
-`<variable>_<profundidad>`
-Por ejemplo: `ksat_0_5`, `clay_5_15`, `bulkd_30_60`, etc.
+La columna identificadora es `cr2sub_id`; las demás columnas usan el prefijo
+`cr2sub_clsoilmap_` seguido de la propiedad y la profundidad, por ejemplo
+`cr2sub_clsoilmap_awc_0_100cm` y
+`cr2sub_clsoilmap_ksat_100_200cm`. Los valores de 0–100 cm se calculan a partir
+de las cinco capas de origen entre 0 y 100 cm; los valores de 100–200 cm
+provienen de la capa de origen de 100–200 cm.
 
 ## Horizonte sintético: 0–100 cm
 
@@ -140,5 +144,3 @@ Donde:
 ### Suma directa de capas (para `AWC`):
 
 awc_0_100 = awc_0_5 + awc_5_15 + awc_15_30 + awc_30_60 + awc_60_100
-
-
