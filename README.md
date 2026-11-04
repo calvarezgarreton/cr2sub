@@ -1,118 +1,91 @@
 # CR2SUB: monthly groundwater level database for Chile
 
-The **CR2SUB** database compiles groundwater level (GWL) observations from 1,137 wells maintained by the Water Bureau of Chile (Dirección General de Aguas, DGA), obtained from [DGA hydrometeorological data portal](https://snia.mop.gob.cl/BNAConsultas/reportes), and processed into a homogenized monthly database for the period **1957-2025**. The database also includes metadata for each observation well and a range of topographical and hydroclimatic attributes computed from ancillary information.  
+CR2SUB compiles groundwater level (GWL) observations from wells of the Chilean Water Bureau (Dirección General de Aguas, DGA), downloaded from the [DGA portal](https://snia.mop.gob.cl/BNAConsultas/reportes), into a homogenized monthly database (1957-August 2026), plus metadata and topographic, hydroclimatic and soil attributes for each well.
 
-This repository is structured in three main folders, explained in detail below: 
-- **cr2sub**: csv files with GWL time series and well attributes.
-- **input**: data used for processing the database.
-- **scripts**: scripts used to process the database.
+**Developer**: Center for Climate and Resilience Research (CR2, ANID/FONDAP/1523A0002), project ANID/FONDECYT/11240924, project ANID IDeA TA TA25I10030. Responsible: Camila Alvarez-Garreton. Collaborators: Rodrigo Marinao Rivas, Juan P. Boisier, Diego Dinamarca.
 
-Data and scripts are openly provided to ensure reproducibility of results. The workflow enables users to update the CR2SUB database whenever new DGA records are downloaded. 
+**License**: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 
-**Developer**: The CR2SUB database has been consolidated within the framework of the Center for Climate and Resilience Research (CR2, ANID/FONDAP/1523A0002) and is part of the research project ANID/FONDECYT/11240924. Responsible: Camila Alvarez-Garreton. Collaborators: Rodrigo Marinao Rivas, Juan P. Boisier, Diego Dinamarca.
+**Citation**: TBD.
 
-**License**: This dataset is distributed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) license. 
+## Versions and releases
 
- **Citation**: Alvarez-Garreton, C., Marinao, R., Boisier, J. P., & Dinamarca, D. (2025). CR2SUB: monthly groundwater level database for Chile (v1.1) [Data set]. Zenodo. https://doi.org/10.5281/zenodo.17591525
-<!-- Article: Streamflow and groundwater recovery after droughts in Chile (*in prep*) -->
+`main` is the canonical branch and contains the current release. Releases are
+identified by immutable Git tags rather than maintained in separate
+version-specific branches. See [the versioning guide](versionado_por_ramas.md)
+for the workflow.
 
-
-## Versions
-
-Each version of CR2SUB lives in its own long-lived branch; folder and script paths are the same in all of them (see [versionado_por_ramas.md](versionado_por_ramas.md)). Use `git switch <branch>` to move between versions.
-
-| Branch | Content |
+| Reference | Status |
 |---|---|
-| `main` | Common documentation (no product version) |
-| `cr2sub_v1.1` | v1.1, published release (Zenodo) |
-| `cr2sub_v1.2` | v1.2  DGA transparency data update (October 2026) |
+| `main` | Current release; v1.2.0 |
+| `v1.2.0` | Immutable release tag for the current v1.2 dataset and pipeline |
+| `cr2sub_v1.2` | Historical version branch, retained for reference |
+| `cr2sub_v1.1` | Legacy branch for the earlier published release; retained for reference |
 
-Data in `input/` may differ between branches; each branch documents what it needs.
+## What's New in v1.2
 
-## cr2sub
+- **New DGA source**: single export obtained through the Transparency Law (see [Data source](#data-source-v12)). Series now extend to August 2026 (v1.1 ended in December 2024).
+- **1,133 wells** (v1.1: 1,137). Four wells of the Taltal basin are not in the new export.
+- **CAMELS-CL v2** basins (860) replace CAMELS-CL v1 (516); basin assignment now uses the basin that contains the well.
+- **CLSoilMaps extraction** is part of the pipeline and requires the heavy rasters (~16.5 GB).
+- **Self-contained pipeline**: local paths go in `.env`, and the review of v1.1 vs v1.2 is in `review_dga_xlsx_migration/`.
 
-**cr2sub_v1.x_gwl_mon.csv**<br>
- Consolidated monthly time series of raw groundwater level (GWL) observations. Raw GWL observations were downloaded as _.xls_ spreadsheets from the [DGA website](https://snia.mop.gob.cl/BNAConsultas/reportes), stored in _input_ and processed through the codes provided in _scripts_. When more than one record was available for a given month, the values were averaged to obtain a single monthly estimate.
+## Data source (v1.2)
 
-**cr2sub_v1.x_gwl_mon_clean.csv**<br>
- Monthly time series after applying an outlier-removal procedure. The code for outlier detection and removal is available in _scripts_.
+The v1.2 groundwater level data were requested from the DGA under the Chilean Transparency Law (Ley de Transparencia, Ley 20.285) through the [Portal de Transparencia](https://www.portaltransparencia.cl/PortalPdT/ingreso-sai-v2). Request N° AM006T0034616 was received on 2026-09-21 (static water levels in wells, January 1950 to August 2026, for 1,137 stations) and answered by the DGA on 2026-10-01. The response is the single export `input/DGA_GWL_obs_descarga/AM006T0034616_1.xlsx`. The DGA reply letter is in `input/DGA_GWL_obs_descarga/transparency_request_AM006T0034616_dga_reply.pdf`.
 
-**cr2sub_v1.1_attributes.csv**<br>
-Metadata of the observation wells extracted from the _.xls_ files downloaded from DGA website (_input_), and climatic, topographical and soil attributes computed from on ancillary information (available in _input_):
-<small>
-- cr2sub_id: unique observation well identifier in cr2sub database. The cr2sub_id is the same as the DGA well code, without the identification last digit.<br>
-- dga_well_code: unique observation well identifier in DGA database, as reported in the _.xls_ downloaded file.<br>
-- dga_well_name: observation well name in DGA database, as reported in the _.xls_ downloaded file.<br>
-- dga_well_basin: basin in which the well is located, as reported by DGA in the _.xls_ downloaded file.<br>
-- dga_well_subbasin: sub-basin in which the well is located, as reported by DGA in the _.xls_ downloaded file.<br>
-- dga_well_lat: latitude of the well (_degrees, minutes, seconds_), as reported by DGA in the _.xls_ downloaded file.<br>
-- dga_well_lon: longitude of the well (_degrees, minutes, seconds_), as reported by DGA in the _.xls_ downloaded file.<br>
-- dga_well_utm_north: latitude of the well (_m, zone not specified_), as reported by DGA in the _.xls_ downloaded file.<br>
-- dga_well_utm_east: longitude of the well (_m, zone not specified_), as reported by DGA in the _.xls_ downloaded file.<br>
-- dga_well_elev: elevation of the well (_m a.s.l._), as reported by DGA in the _.xls_ downloaded file.<br>
-- cr2sub_lat: latitude of the well (_degrees_). The original DGA coordinate was corrected in some cases.<br> 
-- cr2sub_lon: longitude of the well (_degrees_). The original DGA coordinate was corrected in some cases.<br>  
-- cr2sub_utm_north_h19: latitude of the well (_m, zone 19S_). The original DGA coordinate was corrected in some cases.<br>
-- cr2sub_utm_east_h19: longitude of the well (_m, zone 19S_). The original DGA coordinate was corrected in some cases.<br>
-- cr2sub_elev: elevation of the well location (cr2sub_lat, cr2sub_lon) in _m a.s.l._, computed from FABDEM (Forest And Buildings removed copernicus Digital Elevation Model), available from [University of Bristol repository](https://data.bris.ac.uk/data/dataset/s5hqmjcdj8yo2ibzi9b4ew3sn), resampled at 300-m.<br>	
-- cr2sub_slp: slope of the well location (cr2sub_lat, cr2sub_lon) in _degree_, computed from FABDEM resampled at 300-m.<br>	
-- cr2sub_mean_gwl: mean depth of GWL (_m_), computed for all available records in _cr2sub_v1.1_gwl_mon.csv_.<br>
-- cr2sub_sd_gwl: standard deviation of GWL (_m_), computed for all available records in _cr2sub_v1.1_gwl_mon.csv_.<br>
-- cr2sub_cv_gwl: coefficient of variation of GWL (_-_), computed as cr2sub_sd_gwl/abs(cr2sub_mean_gwl).<br>
-- cr2sub_mean_gwl_clean: mean depth of GWL without outliers (_m_), computed for all available data in _cr2sub_v1.1_gwl_mon_clean.csv_.<br>
-- cr2sub_sd_gwl_clean: standard deviation of GWL without outliers (_m_), computed for all available data in _cr2sub_v1.1_gwl_mon_clean.csv_.<br>	
-- cr2sub_cv_gwl_clean: coefficient of variation of GWL without outliers (_-_), computed as cr2sub_sd_gwl_clean/abs(cr2sub_mean_gwl_clean).<br>	
-- cr2sub_in_basin_camels: gauge_id from the smallest CAMELS-CL basin where the well is located. The basin was identified by intersecting the well location (cr2sub_lat, cr2sub_lon) with CAMELS-CL v2021 polygons and stored as a lookup table in _input_.<br>  
-- cr2sub_camels_elev: mean elevation (_m a.s.l._) of the CAMELS-CL basin where the well is located, computed based on FABDEM resampled at 300-m.<br>  
-- cr2sub_camels_slp: mean slope (_degree_) of the CAMELS-CL basin where the well is located, computed based on FABDEM resampled at 300-m.<br>  
-- cr2sub_camels_pr_yr: mean annual precipitation (_mm_) of the CAMELS-CL basin where the well is located, computed based on CR2MET v2.5 for 1980-2010. CR2MET v2.5 daily data were downloaded from https://ftp.cr2.cl/browse/cr2met/v2.5 and processed into annual values (_input_).<br>  
-- cr2sub_camels_pet_yr: mean annual potential evapotranspiration (_mm_) of the CAMELS-CL basin where the well is located, computed based on CR2MET v2.5 for 1980-2010.<br>  
-- cr2sub_camels_aridity: aridity index of the CAMELS-CL basin where the well is located, computed as cr2sub_camels_pet_yr/cr2sub_camels_pr_yr.<br>  
-- cr2sub_camels_sf: snow fraction (_-_) of the CAMELS-CL basin where the well is located, computed as the ratio of mean annual snowfall (_mm_) to mean annual precipitation (_mm_) for 1980-2010, based on CR2MET v2.5 data.<br>  
-- cr2sub_in_basin_bna: id from the smallest BNA basin where the well is located. The basin was identified by intersecting the well location (cr2sub_lat, cr2sub_lon) with BNA polygons downloaded from [DGA spatial data repository](https://dga.mop.gob.cl/mapoteca-digital/) and stored as a lookup table in _input_.<br>  
-- cr2sub_bna_elev: mean elevation (_m a.s.l._) of the BNA basin where the well is located, computed based on FABDEM resampled at 300-m.<br>  
-- cr2sub_bna_slp: mean slope (_degree_) of the BNA basin where the well is located, computed based on FABDEM resampled at 300-m.<br>  
-- cr2sub_bna_pr_yr: mean annual precipitation (_mm_) of the BNA basin where the well is located, computed based on CR2MET v2.5 for 1980-2010<br>	
-- cr2sub_bna_pet_yr: mean annual potential evapotranspiration (_mm_) of the BNA basin where the well is located, computed based CR2MET v2.5 for 1980-2010<br>  
-- cr2sub_bna_aridity: aridity index of the BNA basin where the well is located, computed as cr2sub_bna_pet_yr/cr2sub_bna_pr_yr<br>  	
-- cr2sub_bna_sf: snow fraction (_-_) of the BNA basin where the well is located, computed as the ratio of mean annual snowfall (_mm_) to mean annual precipitation (_mm_) for 1980-2010, based on CR2MET v2.5 data.<br>  
-- cr2sub_clsoilmap_awc_0_100cm: available water content (_mm_) in soil horizon 0-100 cm at well location (cr2sub_lat, cr2sub_lon), computed from [CLSoilMaps database](https://www.nature.com/articles/s41597-023-02536-x), and stored in _input_. <br> 
-- cr2sub_clsoilmap_awc_100_200cm: available water content (_mm_) in soil horizon 100-200 cm at well location, computed from CLSoilMaps. <br>  
-- cr2sub_clsoilmap_ksat_0_100cm: hydraulic conductivity (_cm/day_) in soil horizon 0-100 cm at well location, computed from CLSoilMaps. <br>  
-- cr2sub_clsoilmap_ksat_100_200cm: hydraulic conductivity (_cm/day_) in soil horizon 100-200 cm at well location, computed from CLSoilMaps. <br>  
-- cr2sub_clsoilmap_bulkd_0_100cm: bulk density (_g/cm³_) in soil horizon 0-100 cm at well location, computed from CLSoilMaps. <br>  
-- cr2sub_clsoilmap_bulkd_100_200cm: bulk density (_g/cm³_) in soil horizon 100-200 cm at well location, computed from CLSoilMaps. <br>  
-- cr2sub_clsoilmap_clay_0_100cm: clay content (_%_) in soil horizon 0-100 cm at well location, computed from CLSoilMaps. <br>   
-- cr2sub_clsoilmap_clay_100_200cm: clay content (_%_) in soil horizon 100-200 cm at well location, computed from CLSoilMaps. <br>  
-- cr2sub_clsoilmap_sand_0_100cm: sand content (_%_) in soil horizon 0-100 cm at well location, computed from CLSoilMaps. <br>   
-- cr2sub_clsoilmap_sand_100_200cm: sand content (_%_) in soil horizon 100-200 cm at well location, computed from CLSoilMaps. <br>  
-</small>
+## Output (`cr2sub/`)
 
-## input
-**BNA_basin_polygons**: shapefile with BNA basins boundaries downloaded from [DGA spatial data repository](https://dga.mop.gob.cl/mapoteca-digital/).<br>  
+- `cr2sub_v1.2_gwl_mon.csv`: monthly GWL per well (one column per well). Multiple records in a month are averaged.
+- `cr2sub_v1.2_gwl_mon_clean.csv`: same series after outlier removal.
+- `cr2sub_v1.2_attributes.csv`: one row per well (`cr2sub_id` = DGA well code without the last check digit):
 
-**camels_cl_basins**: shapefile with CAMELS-CL v2021 basins boundaries downloaded from [CAMELS-CL platform](https://www.camels.cr2.cl/).<br>  
+| Columns | Content |
+|---|---|
+| `dga_*` | Metadata as reported by DGA (code, name, basin, sub-basin, coordinates, elevation) |
+| `cr2sub_well_lat/lon`, `cr2sub_well_utm_*_h19` | Well coordinates (degrees; UTM 19S, m); the original DGA coordinates remain in `dga_well_*` |
+| `cr2sub_well_elev`, `cr2sub_well_slp` | Elevation (m a.s.l.) and slope (degrees) at the well, from FABDEM resampled to 300 m |
+| `cr2sub_well_gwl_mon_{stat}_{start}_{end}`, `cr2sub_well_gwl_mon_clean_{stat}_{start}_{end}` | Mean, standard deviation (`sd`) and coefficient of variation (`cv`) of monthly GWL observations for the configured period, raw and after outlier removal; `NA` when a well has no observations in that period |
+| `cr2sub_well_in_basin_camels`, `cr2sub_camels_*` | Smallest CAMELS-CL v2 basin containing the well, plus basin-mean elevation and slope, period-mean annual precipitation (`pr`), mean temperature (`tmean`) and reference evapotranspiration (`et0`), and period-mean annual aridity and snow fraction |
+| `cr2sub_well_in_basin_bna`, `cr2sub_bna_*` | Same basin and climate attributes for the smallest BNA basin |
+| `cr2sub_clsoilmap_*` | Available water content (mm), saturated conductivity (cm/day), bulk density (g/cm³), clay and sand (%) for 0-100 and 100-200 cm, from CLSoilMaps (500 m buffer around the well). NA outside CLSoilMaps coverage |
 
-**CLSoilMaps**: soil data computed from [CLSoilMaps database](https://www.nature.com/articles/s41597-023-02536-x). 
+The period-based columns use the configured start and end years in their names (for example, `cr2sub_camels_pr_yr_mean_1980_2010`, `cr2sub_camels_aridity_1980_2010`, and `cr2sub_bna_sf_1980_2010`). Basin aridity and snow fraction are calculated annually as the ratio of basin-mean annual values (`et0/pr` and `sf/pr`), then averaged over the configured period.
 
-**cr2met**: precipitation, potential evapotranspiration and snowfall data v2.5 downloaded from https://ftp.cr2.cl/browse/cr2met/v2.5 and processed into monthly values.
+## Input (`input/`)
 
-**dem**: elevation and slope data obtained from FABDEM (Forest And Buildings removed copernicus Digital Elevation Model), available from [University of Bristol repository](https://data.bris.ac.uk/data/dataset/s5hqmjcdj8yo2ibzi9b4ew3sn), resampled at 300-m.<br>
+| Folder | Content |
+|---|---|
+| `DGA_GWL_obs_descarga/` | DGA export `AM006T0034616_1.xlsx` (raw observations and well metadata), obtained through the Transparency Law |
+| `camels_cl_basins/` | CAMELS-CL v2 basin boundaries (`.gpkg`, 860 basins), from [CAMELS-CL](https://www.camels.cr2.cl/) |
+| `BNA_basins/` | BNA basin boundaries, from the [DGA repository](https://dga.mop.gob.cl/mapoteca-digital/) |
+| `cr2sub_basin_lookup_tables/` | Well-to-basin tables and the script that builds them |
+| `dem/` | FABDEM elevation and slope, 300 m ([source](https://data.bris.ac.uk/data/dataset/s5hqmjcdj8yo2ibzi9b4ew3sn)) |
+| `cr2met/` | CR2MET download and daily-processing scripts, plus the annual NetCDF rasters used by the pipeline; daily source files stay under `CR2MET_DATA_DIR` ([source](https://ftp.cr2.cl/browse/cr2met/v2.5)) |
+| `CLSoilMaps/` | Version-specific soil attributes CSV, named with the CR2SUB tag and version; generated for all wells when missing, then updated for new wells |
+| `other_data/` | Simplified national boundary (BCN-SIIT), used to validate well coordinates |
 
-**DGA_GWL_observations**: raw GWL observations downloaded as _.xls_ spreadsheets from the [DGA website](https://snia.mop.gob.cl/BNAConsultas/reportes).
-<small>
-- dga_xls_1950-01-01_2025-03-31: a bulk download of GWL observations spreadsheets including the initial period of GWL records (1957–04-01) until 2025-03-31. These spreadsheets were downloaded manually for all available observation wells in Chile.
-- dga_xls_update_2025-06-10 and dga_xls_update_2025-08-05: additional downloads made on 2025-06-10 amd 2025-08-05, respectively, that serve to illustrate how new updates can be processed and merged into the initial bulk downloaded data.
-</small>
+The CLSoilMaps rasters are large (~16.5 GB) and are not in git. They are needed when the version-specific CSV is first generated or when new wells are added: copy `.env.example` to `.env`, set `CR2SUB_HEAVY_DATA` to a local folder, then run `cd input/CLSoilMaps && Rscript download_clsoilmaps.R` from the repository root ([source](https://zenodo.org/records/7464210)).
 
-**other_data**:
-<small>
-- Chile_boundary_simplified_from_SIIT: shapefile with national boundaries downloaded from https://www.bcn.cl/siit/mapas_vectoriales. 
-- cr2sub_v1.1_join_table_with_bna_basins: lookup table with the codes of the BNA basin(s) in which the CR2SUB observation wells are located.<br>  
-- cr2sub_v1.1_join_table_with_camels_cl_v2021_basins: lookup table with the codes of the CAMELS-CL v2021 basin(s) in which the CR2SUB observation wells are located.<br>  
-</small>
+CR2MET daily NetCDF files are kept outside the repository in the folder configured by `CR2MET_DATA_DIR` in `.env`. Install the Python requirements with `python3 -m pip install -r scripts/functions/python_requirements.txt`, then, from the repository root, download the daily files with `python3 input/cr2met/download_cr2met_ftp.py` and generate annual rasters with `python3 input/cr2met/process_cr2met_daily.py`. The processor reads daily inputs from `CR2MET_DATA_DIR` and writes only annual files to `input/cr2met/`; these are consumed by the main pipeline and can be versioned in Git.
 
-## scripts
-This folder contains the scripts used to process the database. These can be run by users to update CR2SUB if new data from DGA is downloaded. To run the scripts 01, 02 and 03 sequentially, run the main pipeline in the terminal: 
-```bash 
+## Running the pipeline
+
+Configure the tag, version, statistical period, input/output paths, CLSoilMaps buffer and diagnostic plot settings in `scripts/main_pipeline.py`. For a new CR2MET release, update its paths there. `.env` defines `CR2SUB_HEAVY_DATA` for the large CLSoilMaps rasters and `CR2MET_DATA_DIR` for CR2MET daily downloads. The processor writes annual aggregates to `input/cr2met/`, where the pipeline reads them.
+
+Requires R (packages `readxl`, `zoo`, `terra`, `sf`, `dplyr`, `readr`, `tibble`) and Python with the packages in `scripts/functions/python_requirements.txt`. Configure `.env` as described above. From the repository root:
+
+```bash
 python3 scripts/main_pipeline.py
+```
+
+| Step | Script | Does |
+|---|---|---|
+| 01 | `01_consolidate.R` | Reads the DGA export, builds well metadata and monthly series |
+| 01b | `01b_extract_clsoilmaps.R` | Creates the version-specific CLSoilMaps CSV on the first run, then adds attributes for wells not yet included |
+| 02 | `02_remove_outliers.ipynb` | Outlier removal |
+| 03 | `03_process_attributes.R` | Builds `cr2sub_v1.2_attributes.csv` |
+
+The CLSoilMaps CSV filename is configured in `scripts/main_pipeline.py` and includes the tag and CR2SUB version (for example, `cr2sub_CLSoilMaps_data_cr2sub_v1.2.csv`) so each version remains separate and can be compared with previous ones. Step 01b creates it for all wells if missing, or preserves existing rows and adds new wells. This requires the rasters downloaded with `cd input/CLSoilMaps && Rscript download_clsoilmaps.R`.
+
+If wells are added or removed, rebuild the basin tables before step 03 with `Rscript input/cr2sub_basin_lookup_tables/lookup_table_script.R` (after step 01).
