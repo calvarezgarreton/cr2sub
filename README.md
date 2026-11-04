@@ -10,17 +10,19 @@ CR2SUB compiles groundwater level (GWL) observations from wells of the Chilean W
 
 ## Versions and releases
 
-`main` is the canonical branch and contains the current release. Releases are
-identified by immutable Git tags rather than maintained in separate
-version-specific branches. See [the versioning guide](versionado_por_ramas.md)
-for the workflow.
+`main` is the canonical branch for current development and contains the latest
+integrated state. A release is a fixed snapshot identified by an immutable,
+annotated Git tag (for example, `v1.2.0`); version-specific branches are not
+used for releases. The old `cr2sub_v1.1` and `cr2sub_v1.2` branches are kept
+only as archived, read-only references and are not active development branches.
+See [the versioning guide](versionado_por_ramas.md) for the workflow.
 
 | Reference | Status |
 |---|---|
-| `main` | Current release; v1.2.0 |
-| `v1.2.0` | Immutable release tag for the current v1.2 dataset and pipeline |
-| `cr2sub_v1.2` | Historical version branch, retained for reference |
-| `cr2sub_v1.1` | Legacy branch for the earlier published release; retained for reference |
+| `main` | Canonical branch for current development; includes the integrated v1.2 release |
+| `v1.2.0` | Immutable release tag for the v1.2 dataset and pipeline |
+| `cr2sub_v1.2` | Archived, read-only historical branch; not for new development |
+| `cr2sub_v1.1` | Archived, read-only branch for the earlier published release; not for new development |
 
 ## What's New in v1.2
 

@@ -2,15 +2,15 @@
 
 ## Convención
 
-- `main` es la rama canónica y contiene la versión vigente del producto.
+- `main` es la rama canónica para el desarrollo vigente y contiene el último estado integrado.
 - Cada release se identifica con un tag anotado e inmutable, como `v1.2.0`.
 - Las ramas de trabajo son temporales y se integran a `main` mediante pull request.
-- Las ramas históricas `cr2sub_v1.1` y `cr2sub_v1.2` se conservan como referencia durante la transición; no son el lugar para desarrollar nuevas versiones.
+- Las ramas `cr2sub_v1.1` y `cr2sub_v1.2` son referencias históricas archivadas, de solo lectura y no destinadas a nuevo desarrollo. Se conservan para facilitar la reproducción y comparación; los tags, no las ramas, identifican las releases.
 - Los archivos de resultados cuyo nombre incluye la versión (por ejemplo, `cr2sub_v1.2_attributes.csv`) mantienen esa versión aunque estén en `main`.
 
 ## Flujo de trabajo
 
-1. Actualizar `main` y crear una rama de trabajo: `git switch -c feature/descripcion main`.
+1. Actualizar `main` y crear una rama de trabajo desde ella: `git switch -c feature/descripcion main`.
 2. Implementar y validar los cambios en esa rama.
 3. Abrir un pull request hacia `main`; revisar los cambios y las validaciones antes de integrarlo.
 4. Para una nueva release, actualizar los metadatos y nombres de salida de la versión, validar los archivos publicados y crear un tag anotado en el commit final de `main`, por ejemplo: `git tag -a v1.3.0 -m "CR2SUB v1.3.0"`.
