@@ -43,14 +43,14 @@ The v1.2 groundwater level data were requested from the DGA under the Chilean Tr
 | Columns | Content |
 |---|---|
 | `dga_*` | Metadata as reported by DGA (code, name, basin, sub-basin, coordinates, elevation) |
-| `cr2sub_well_lat/lon`, `cr2sub_well_utm_*_h19` | Well coordinates (degrees; UTM 19S, m); the original DGA coordinates remain in `dga_well_*` |
+| `cr2sub_well_lat`, `cr2sub_well_lon`, `cr2sub_well_utm_north_h19`, `cr2sub_well_utm_east_h19` | Well coordinates (latitude and longitude in degrees; UTM 19S northing and easting in m); the original DGA coordinates remain in `dga_well_*` |
 | `cr2sub_well_elev`, `cr2sub_well_slp` | Elevation (m a.s.l.) and slope (degrees) at the well, from FABDEM resampled to 300 m |
-| `cr2sub_well_gwl_mon_{stat}_{start}_{end}`, `cr2sub_well_gwl_mon_clean_{stat}_{start}_{end}` | Mean, standard deviation (`sd`) and coefficient of variation (`cv`) of monthly GWL observations for the configured period, raw and after outlier removal; `NA` when a well has no observations in that period |
-| `cr2sub_well_in_basin_camels`, `cr2sub_camels_*` | Smallest CAMELS-CL v2 basin containing the well, plus basin-mean elevation and slope, period-mean annual precipitation (`pr`), mean temperature (`tmean`) and reference evapotranspiration (`et0`), and period-mean annual aridity and snow fraction |
-| `cr2sub_well_in_basin_bna`, `cr2sub_bna_*` | Same basin and climate attributes for the smallest BNA basin |
+| `cr2sub_well_gwl_mon_{stat}_1980_2010`, `cr2sub_well_gwl_mon_clean_{stat}_1980_2010` | Statistics of monthly GWL observations and monthly GWL observations after outlier removal, respectively, over the inclusive 1980-2010 period. `{stat}` is `mean` (mean), `sd` (standard deviation), or `cv` (coefficient of variation). Values are `NA` when a well has no observations in this period. |
+| `cr2sub_well_in_basin_camels`, `cr2sub_camels_*` | Smallest CAMELS-CL v2 basin containing the well, plus basin-mean elevation and slope; period-mean annual precipitation (`pr`), mean temperature (`tmean`), and reference evapotranspiration (`et0`); and period-mean annual aridity (`aridity`) and snow fraction (`sf`). Climate statistics use 1980-2010 inclusive. |
+| `cr2sub_well_in_basin_bna`, `cr2sub_bna_*` | Same basin and climate attributes for the smallest BNA basin, using the inclusive 1980-2010 period for climate statistics. |
 | `cr2sub_clsoilmap_*` | Available water content (mm), saturated conductivity (cm/day), bulk density (g/cm³), clay and sand (%) for 0-100 and 100-200 cm, from CLSoilMaps (500 m buffer around the well). NA outside CLSoilMaps coverage |
 
-The period-based columns use the configured start and end years in their names (for example, `cr2sub_camels_pr_yr_mean_1980_2010`, `cr2sub_camels_aridity_1980_2010`, and `cr2sub_bna_sf_1980_2010`). Basin aridity and snow fraction are calculated annually as the ratio of basin-mean annual values (`et0/pr` and `sf/pr`), then averaged over the configured period.
+For official release v1.2, all period-based statistics use the inclusive period from 1980 through 2010. The start and end years are included in each period-based column name (for example, `cr2sub_well_gwl_mon_mean_1980_2010`, `cr2sub_well_gwl_mon_clean_cv_1980_2010`, `cr2sub_camels_pr_yr_mean_1980_2010`, `cr2sub_camels_tmean_yr_mean_1980_2010`, `cr2sub_camels_aridity_1980_2010`, and `cr2sub_bna_sf_1980_2010`). Basin aridity and snow fraction are calculated annually as ratios of basin-mean annual values (`et0/pr` and `sf/pr`), then averaged over 1980-2010.
 
 ## Input (`input/`)
 
