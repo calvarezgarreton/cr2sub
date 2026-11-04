@@ -329,10 +329,10 @@ vectorial, sin dependencias externas).
 
 # Cómo reproducir
 
-Todo junto (tras `main_pipeline.py`): `review_dga_xlsx_migration/scripts/regenerate_review.sh`. Por partes:
+Todo junto (tras `main_pipeline.py`): `review_v1.2_vs_v1.1/scripts/regenerate_review.sh`. Por partes:
 
 ```bash
-cd review_dga_xlsx_migration/scripts
+cd review_v1.2_vs_v1.1/scripts
 python3 compare_outputs.py        # series y metadatos; solo stdlib
 python3 compare_attributes.py     # atributos y CLSoilMaps; pandas, matplotlib
 python3 compare_plots.py          # figuras A-F; pandas, matplotlib

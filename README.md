@@ -28,7 +28,7 @@ for the workflow.
 - **1,133 wells** (v1.1: 1,137). Four wells of the Taltal basin are not in the new export.
 - **CAMELS-CL v2** basins (860) replace CAMELS-CL v1 (516); basin assignment now uses the basin that contains the well.
 - **CLSoilMaps extraction** is part of the pipeline and requires the heavy rasters (~16.5 GB).
-- **Self-contained pipeline**: local paths go in `.env`, and the review of v1.1 vs v1.2 is in `review_dga_xlsx_migration/`.
+- **Self-contained pipeline**: local paths go in `.env`, and the review of v1.1 vs v1.2 is in `review_v1.2_vs_v1.1/`.
 
 ## Data source (v1.2)
 
